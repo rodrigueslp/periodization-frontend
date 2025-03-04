@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import FormStepper from '../components/periodization/FormStepper';
 import { periodizationService } from '../services/periodization';
+import { paymentService } from '../services/payment';
 
 const CreatePlanPage = () => {
   const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ const CreatePlanPage = () => {
   const handleSubmit = async (formData) => {
     setLoading(true);
     setError(null);
-
+  
     try {
       // Construir o objeto de requisição
       const requestData = {
@@ -23,27 +24,48 @@ const CreatePlanPage = () => {
           altura: formData.altura,
           experiencia: formData.experiencia,
           objetivo: formData.objetivo,
+          objetivoDetalhado: formData.objetivoDetalhado,
           disponibilidade: formData.disponibilidade,
           lesoes: formData.lesoes,
           historico: formData.historico,
           benchmarks: formData.benchmarks
         },
-        planDuration: formData.planDuration,
-        paymentStatus: 'completed' // Adicionar informação de pagamento (este valor seria validado pelo backend)
+        planDuration: formData.planDuration
       };
-
-      // Usar o serviço de periodização em vez de chamar axios diretamente
-      const response = await periodizationService.createPlan(requestData);
+  
+      // Passo 1: Criar plano pendente
+      const planResponse = await periodizationService.createPendingPlan(requestData);
+      const planId = planResponse.planId;
       
-      // Redirecionar para a página de visualização do plano
-      navigate(`/view-plan/${response.planId}`);
+      // Passo 2: Iniciar pagamento para este plano
+      const paymentRequest = {
+        planId: planId,
+        description: "Plano de Periodização CrossFit",
+        amount: 9.90
+      };
+      
+      const paymentResponse = await paymentService.createPayment(paymentRequest);
+      
+      // Armazenar informações importantes no localStorage para recuperação
+      localStorage.setItem('pendingPlan', JSON.stringify({
+        planId: planId,
+        externalReference: paymentResponse.externalReference
+      }));
+      
+      // Redirecionar para a página de pagamento
+      navigate('/payment', { 
+        state: { 
+          paymentData: paymentResponse,
+          planId: planId
+        } 
+      });
+      
     } catch (err) {
       console.error('Erro ao criar periodização:', err);
       setError(
         err.message || 
-        'Ocorreu um erro ao gerar a periodização. Por favor, tente novamente.'
+        'Ocorreu um erro ao criar a periodização. Por favor, tente novamente.'
       );
-    } finally {
       setLoading(false);
     }
   };

@@ -69,6 +69,10 @@ const PlanSummary = ({ formData, prevStep, nextStep }) => {
               <dd className="mt-1 text-sm text-gray-900">{formData.planDuration} semanas</dd>
             </div>
             <div className="sm:col-span-2">
+              <dt className="text-sm font-medium text-gray-500">Objetivo Detalhado</dt>
+              <dd className="mt-1 text-sm text-gray-900">{formData.objetivoDetalhado || 'Nenhum informado'}</dd>
+            </div>
+            <div className="sm:col-span-2">
               <dt className="text-sm font-medium text-gray-500">Lesões ou Limitações</dt>
               <dd className="mt-1 text-sm text-gray-900">{formData.lesoes || 'Nenhuma informada'}</dd>
             </div>

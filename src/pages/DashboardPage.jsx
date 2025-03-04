@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { periodizationService } from '../services/periodization';
+import { useNavigate } from 'react-router-dom';
 
 const DashboardPage = () => {
   const [stats, setStats] = useState({
@@ -11,6 +12,24 @@ const DashboardPage = () => {
     recentPlans: []
   });
   const [loading, setLoading] = useState(true);
+  const [generatingPlanId, setGeneratingPlanId] = useState(null);
+  
+  const navigate = useNavigate();
+
+  const handleGeneratePlan = async (planId) => {
+    try {
+      setLoading(true);
+      await periodizationService.generateApprovedPlan(planId);
+      
+      // Redirecionar para a página de visualização do plano
+      navigate(`/view-plan/${planId}`);
+    } catch (error) {
+      console.error('Erro ao gerar plano:', error);
+      // Mostrar mensagem de erro se necessário
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -169,6 +188,54 @@ const DashboardPage = () => {
                 </div>
               </div>
             </div>
+
+            {/* Planos Pendentes de Geração */}
+            {stats.recentPlans.some(plan => plan.canGenerate) && (
+              <div className="bg-white rounded-lg shadow overflow-hidden mb-8">
+                <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    Planos Pendentes de Geração
+                  </h3>
+                  <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                    Planos que foram pagos mas ainda não foram gerados
+                  </p>
+                </div>
+                
+                <ul className="divide-y divide-gray-200">
+                  {stats.recentPlans
+                    .filter(plan => plan.canGenerate)
+                    .map((plan) => (
+                      <li key={plan.planId} className="px-4 py-4 sm:px-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-indigo-600">{plan.athleteName}</h4>
+                            <p className="text-xs text-gray-500">
+                              Criado em {new Date(plan.createdAt).toLocaleDateString('pt-BR')}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleGeneratePlan(plan.planId)}
+                            disabled={generatingPlanId === plan.planId}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400"
+                          >
+                            {generatingPlanId === plan.planId ? (
+                              <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Gerando...
+                              </>
+                            ) : (
+                              'Gerar Plano'
+                            )}
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
 
             {/* Periodizações Recentes */}
             <div className="bg-white rounded-lg shadow overflow-hidden">

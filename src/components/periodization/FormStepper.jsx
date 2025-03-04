@@ -4,6 +4,7 @@ import TrainingInfoStep from './TrainingInfoStep';
 import BenchmarksStep from './BenchmarksStep';
 import PlanSummary from './PlanSummary';
 import PaymentStep from './PaymentStep';
+import { periodizationService } from '../../services/periodization';
 
 const FormStepper = ({ onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -14,6 +15,7 @@ const FormStepper = ({ onSubmit }) => {
     altura: '',
     experiencia: '',
     objetivo: '',
+    objetivoDetalhado: '',
     disponibilidade: '',
     lesoes: '',
     historico: '',
@@ -25,17 +27,60 @@ const FormStepper = ({ onSubmit }) => {
       fran: '',
       grace: ''
     },
-    planDuration: 8
+    planDuration: 4
   });
 
   const updateFormData = (data) => {
     setFormData({ ...formData, ...data });
   };
 
-  const nextStep = () => {
-    setCurrentStep(currentStep + 1);
-  };
+  // Em FormStepper.jsx - modificar o método nextStep para o caso de ir do PlanSummary para o PaymentStep
+  const nextStep = async () => {
+    // Se estiver indo para o passo de pagamento (step 4 -> 5)
+    if (currentStep === 4) {
+      try {
+        // Construir o objeto de requisição
+        const requestData = {
+          athleteData: {
+            nome: formData.nome,
+            idade: parseInt(formData.idade),
+            peso: parseFloat(formData.peso),
+            altura: parseFloat(formData.altura),
+            experiencia: formData.experiencia,
+            objetivo: formData.objetivo,
+            objetivoDetalhado: formData.objetivoDetalhado,
+            disponibilidade: parseInt(formData.disponibilidade),
+            lesoes: formData.lesoes,
+            historico: formData.historico,
+            benchmarks: {
+              backSquat: formData.benchmarks.backSquat ? parseFloat(formData.benchmarks.backSquat) : null,
+              deadlift: formData.benchmarks.deadlift ? parseFloat(formData.benchmarks.deadlift) : null,
+              clean: formData.benchmarks.clean ? parseFloat(formData.benchmarks.clean) : null,
+              snatch: formData.benchmarks.snatch ? parseFloat(formData.benchmarks.snatch) : null,
+              fran: formData.benchmarks.fran,
+              grace: formData.benchmarks.grace
+            }
+          },
+          planDuration: formData.planDuration
+        };
 
+        // Criar plano pendente
+        const response = await periodizationService.createPendingPlan(requestData);
+        
+        // Armazenar o planId no formData para uso no PaymentStep
+        setFormData({ ...formData, planId: response.planId });
+        
+        // Agora avançar para o passo de pagamento
+        setCurrentStep(currentStep + 1);
+      } catch (error) {
+        console.error("Erro ao criar plano pendente:", error);
+        // Mostrar mensagem de erro, se necessário
+      }
+    } else {
+      // Comportamento normal para outros passos
+      setCurrentStep(currentStep + 1);
+    }
+  };
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
   };

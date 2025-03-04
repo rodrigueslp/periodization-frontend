@@ -1,5 +1,5 @@
 // Configuração base para fetchAPI
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // Função genérica para fetchAPI com tratamento de erros
 async function fetchAPI(endpoint, options = {}) {
@@ -18,8 +18,6 @@ async function fetchAPI(endpoint, options = {}) {
     ...options,
     headers
   };
-
-  console.log(config);
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);

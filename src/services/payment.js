@@ -2,13 +2,7 @@ import api from './api';
 
 export const paymentService = {
   // Criar um pagamento e obter o código Pix ou URL de pagamento
-  createPayment: async (planId) => {
-    const paymentData = {
-      planId,
-      description: "Plano de Periodização CrossFit",
-      amount: 9.90
-    };
-    
+  createPayment: async (paymentData) => {
     return api.post('/api/payments', paymentData);
   },
   

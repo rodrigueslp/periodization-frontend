@@ -90,7 +90,7 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
               Duração do Plano (semanas)
             </label>
             <div className="mt-1">
-              <select
+            <select
                 id="planDuration"
                 name="planDuration"
                 value={formData.planDuration}
@@ -99,9 +99,24 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
               >
                 <option value="4">4 semanas</option>
                 <option value="8">8 semanas</option>
-                <option value="12">12 semanas</option>
-                <option value="16">16 semanas</option>
               </select>
+            </div>
+          </div>
+
+          <div className="sm:col-span-6">
+            <label htmlFor="lesoes" className="block text-sm font-medium text-gray-700">
+              Detalhe seu Objetivo
+            </label>
+            <div className="mt-1">
+              <textarea
+                id="objetivoDetalhado"
+                name="objetivoDetalhado"
+                rows={3}
+                value={formData.objetivoDetalhado}
+                onChange={handleChange}
+                placeholder='Descreva detalhadamente seu objetivo, como "Quero aumentar minhas cargas em CLEAN and JERK". Preencha apenas se você quiser focar em algum objetivo especifico.'
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
             </div>
           </div>
 

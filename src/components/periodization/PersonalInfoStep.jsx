@@ -71,24 +71,26 @@ const PersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
               />
             </div>
           </div>
-
           <div className="sm:col-span-2">
             <label htmlFor="altura" className="block text-sm font-medium text-gray-700">
-              Altura (cm) *
+              Altura (m) *
             </label>
             <div className="mt-1">
               <input
                 type="number"
                 name="altura"
                 id="altura"
-                min="100"
-                max="220"
+                min="1.00"
+                max="2.50"
+                step="0.01"
+                placeholder="Ex: 1.75"
                 required
                 value={formData.altura}
                 onChange={handleChange}
                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500">Utilize ponto (ex: 1.75)</p>
           </div>
         </div>
       </div>

@@ -15,6 +15,15 @@ export const periodizationService = {
   createPlan: async (planData) => {
     return api.post('/api/periodization', planData);
   },
+
+  createPendingPlan: async (planData) => {
+    return api.post('/api/periodization', planData);
+  },
+  
+  // Gerar conteúdo para um plano que já foi pago
+  generateApprovedPlan: async (planId) => {
+    return api.post(`/api/periodization/${planId}/generate`);
+  },
   
   // Fazer download do plano
   downloadPlan: async (planId) => {
