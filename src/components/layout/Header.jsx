@@ -31,7 +31,7 @@ const Header = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard" className="text-2xl font-extrabold text-indigo-600">
-                ExtraBox
+                Planilize
               </Link>
             </div>
             <nav className="ml-6 flex space-x-8">
