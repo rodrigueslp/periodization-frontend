@@ -8,6 +8,8 @@ import DashboardPage from './pages/DashboardPage';
 import CreatePlanPage from './pages/CreatePlanPage';
 import ViewPlanPage from './pages/ViewPlanPage';
 import PlansListPage from './pages/PlansListPage';
+// Importe o novo componente de redirecionamento de pagamento
+import PaymentRedirect from './components/payment/PaymentRedirect';
 
 // Auth Guard - componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -68,6 +70,16 @@ function App() {
             element={
               <PrivateRoute>
                 <PlansListPage />
+              </PrivateRoute>
+            } 
+          />
+          
+          {/* Nova rota para redirecionamento de pagamento */}
+          <Route 
+            path="/payment-redirect" 
+            element={
+              <PrivateRoute>
+                <PaymentRedirect />
               </PrivateRoute>
             } 
           />

@@ -1,267 +1,197 @@
 // src/components/training/FormattedPlanContent.jsx
+
 import React, { useState, useEffect } from 'react';
 
-const FormattedPlanContent = ({ content }) => {
-  // Garantir que content seja uma string
-  const textContent = content ? String(content) : '';
+// Você pode ajustar estas variáveis para combinar com a cor da sua logo
+const THEME_COLORS = {
+  // Cor principal (para o cabeçalho das seções)
+  primaryBg: 'bg-indigo-500',  // Substitua por sua cor, por exemplo 'bg-blue-500' ou 'bg-[#FF5500]'
+  primaryText: 'text-white',
+  primaryHover: 'hover:bg-indigo-600',
   
-  // State para controlar seções expandidas/minimizadas
-  const [expandedSections, setExpandedSections] = useState({});
+  // Cor secundária (para botões de expandir/fechar)
+  secondaryBg: 'bg-indigo-100',
+  secondaryText: 'text-indigo-700',
+  secondaryHover: 'hover:bg-indigo-200',
+  
+  // Cor dos ícones
+  iconColor: 'text-white'
+};
 
-  // Efeito para configurar todas as seções como expandidas ou não por padrão
-  useEffect(() => {
-    const initialState = {};
-    sections.forEach(section => {
-      initialState[section.title] = true; // true = expandido
-    });
-    setExpandedSections(initialState);
-  }, [textContent]);
+const FormattedPlanContent = ({ content }) => {
+  // Estado para controlar quais seções estão expandidas
+  // Por padrão, todas estarão fechadas (array vazio)
+  const [expandedSections, setExpandedSections] = useState([]);
   
-  // Processar o conteúdo para identificar seções principais
-  const processContent = (text) => {
-    // Remove caracteres especiais extras e formata o texto
-    const cleanText = text
-      .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n');
-      
-    return cleanText;
+  // Função para verificar se uma seção está expandida
+  const isSectionExpanded = (sectionId) => {
+    return expandedSections.includes(sectionId);
   };
   
-  // Extrair seções do conteúdo
-  const extractSections = (text) => {
-    const lines = text.split('\n');
+  // Função para alternar o estado de uma seção
+  const toggleSection = (sectionId) => {
+    if (isSectionExpanded(sectionId)) {
+      setExpandedSections(expandedSections.filter(id => id !== sectionId));
+    } else {
+      setExpandedSections([...expandedSections, sectionId]);
+    }
+  };
+  
+  // Função para expandir todas as seções
+  const expandAllSections = (sectionIds) => {
+    setExpandedSections(sectionIds);
+  };
+  
+  // Função para fechar todas as seções
+  const collapseAllSections = () => {
+    setExpandedSections([]);
+  };
+  
+  // Analisar o conteúdo para extrair as seções (semanas)
+  const parseContent = () => {
+    if (!content) return [];
+    
+    // Podemos assumir que o conteúdo é uma string formatada em HTML ou markdown
+    // Vamos dividir o conteúdo em seções usando um padrão específico (ex: ## Semana)
+    // Este código precisa ser adaptado ao formato real dos seus dados
+    
     const sections = [];
+    const lines = content.split('\n');
+    let currentSection = null;
+    let currentContent = [];
     
-    let currentSectionTitle = 'Introdução';
-    let currentSectionContent = [];
-    let inSection = false;
-    
-    lines.forEach((line, index) => {
-      // Detectar cabeçalhos de seção (## TÍTULO ou # TÍTULO)
-      const sectionMatch = line.match(/^#{1,2}\s+(.+)$/);
-      const isBigHeader = line.startsWith('# ');
-      const isSectionHeader = line.startsWith('## ');
+    lines.forEach((line) => {
+      // Verifica se a linha é um cabeçalho de semana
+      // Ajuste este regex conforme o formato real do seu conteúdo
+      const weekHeaderMatch = line.match(/#{2,3}\s*(Semana\s*\d+|Week\s*\d+)/i);
       
-      // Para cabeçalhos grandes # ou seções ##
-      if (isBigHeader || isSectionHeader) {
-        // Se já estávamos em uma seção, salvamos ela
-        if (inSection) {
+      if (weekHeaderMatch) {
+        // Se já temos uma seção, salvamos ela antes de começar uma nova
+        if (currentSection) {
           sections.push({
-            title: currentSectionTitle,
-            content: currentSectionContent
+            id: currentSection,
+            title: currentSection,
+            content: currentContent.join('\n')
           });
-          currentSectionContent = [];
         }
         
-        // Iniciar nova seção
-        inSection = true;
-        // Remover os símbolos # do título
-        currentSectionTitle = line.replace(/^#+\s+/, '');
-      }
-      // Se estamos em uma seção, adicionar a linha ao conteúdo atual
-      else if (inSection) {
-        currentSectionContent.push(line);
-      }
-      // Se não estamos em uma seção e não é um cabeçalho, é conteúdo introdutório
-      else {
-        // Apenas para a primeira seção (introdução)
-        if (sections.length === 0) {
-          if (line.trim() !== '') {
-            currentSectionContent.push(line);
-          }
-        }
+        // Inicia uma nova seção
+        currentSection = weekHeaderMatch[0];
+        currentContent = [line];
+      } else if (currentSection) {
+        currentContent.push(line);
       }
     });
     
-    // Adicionar a última seção se houver conteúdo
-    if (inSection) {
+    // Adiciona a última seção
+    if (currentSection) {
       sections.push({
-        title: currentSectionTitle,
-        content: currentSectionContent
-      });
-    } else if (currentSectionContent.length > 0) {
-      // Adicionar introdução se houver conteúdo
-      sections.push({
-        title: 'Introdução',
-        content: currentSectionContent
+        id: currentSection,
+        title: currentSection,
+        content: currentContent.join('\n')
       });
     }
     
     return sections;
   };
-
-  // Formatar uma linha individual
-  const formatLine = (line) => {
-    // Remover ## ou # do início (cabeçalhos)
-    line = line.replace(/^#+\s+/, '');
-    
-    // Substituir **texto** por <strong>texto</strong>
-    line = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-    
-    return line;
-  };
-
-  // Renderizar uma linha formatada para HTML
-  const renderFormattedLine = (line) => {
-    // Tratar negrito
-    const parts = [];
-    let lastIndex = 0;
-    
-    // Encontrar padrões **texto** para negrito
-    const boldRegex = /\*\*([^*]+)\*\*/g;
-    let match;
-    
-    while ((match = boldRegex.exec(line)) !== null) {
-      // Adicionar texto antes do negrito
-      if (match.index > lastIndex) {
-        parts.push({
-          type: 'text',
-          content: line.substring(lastIndex, match.index)
-        });
-      }
-      
-      // Adicionar texto em negrito
-      parts.push({
-        type: 'bold',
-        content: match[1]
-      });
-      
-      lastIndex = match.index + match[0].length;
-    }
-    
-    // Adicionar texto restante
-    if (lastIndex < line.length) {
-      parts.push({
-        type: 'text',
-        content: line.substring(lastIndex)
-      });
-    }
-    
-    // Se não encontrou partes, retorna a linha inteira
-    if (parts.length === 0) {
-      return line;
-    }
-    
-    // Renderizar as partes
-    return parts.map((part, index) => {
-      if (part.type === 'bold') {
-        return <strong key={index}>{part.content}</strong>;
-      } else {
-        return <span key={index}>{part.content}</span>;
-      }
-    });
-  };
-
-  // Renderizar o conteúdo de uma seção
-  const renderSectionContent = (lines) => {
-    if (!lines || lines.length === 0) return null;
-    
-    return lines.map((line, index) => {
-      // Detectar tipo de linha
-      if (line.match(/^-\s+\*\*([^*]+)\*\*:/)) {
-        // Item de lista em negrito com dois pontos (campo: valor)
-        const parts = line.split(':');
-        const label = parts[0].replace(/^-\s+\*\*/, '').replace(/\*\*$/, '');
-        const value = parts.slice(1).join(':').trim();
-        
-        return (
-          <div key={index} className="flex py-1">
-            <div className="w-40 font-semibold text-indigo-700">{label}:</div>
-            <div>{value}</div>
-          </div>
-        );
-      } 
-      else if (line.match(/^-\s+/)) {
-        // Item de lista simples
-        const content = line.replace(/^-\s+/, '');
-        
-        return (
-          <div key={index} className="pl-4 border-l-2 border-indigo-100 py-1">
-            <span className="text-indigo-500 mr-2">•</span>
-            {renderFormattedLine(content)}
-          </div>
-        );
-      }
-      else if (line.match(/^#/)) {
-        // Cabeçalho nível 3 ou mais
-        const content = line.replace(/^#+\s+/, '');
-        const level = (line.match(/^#+/) || [''])[0].length;
-        
-        if (level >= 3) {
-          return (
-            <h4 key={index} className="font-semibold text-lg text-indigo-600 mt-4 mb-2">
-              {content}
-            </h4>
-          );
-        }
-      }
-      else if (line.trim() === '') {
-        // Linha vazia
-        return <div key={index} className="h-2"></div>;
-      }
-      
-      // Linha normal
-      return (
-        <p key={index} className="py-1">
-          {renderFormattedLine(line)}
-        </p>
-      );
-    });
-  };
-
-  // Toggle para expandir/minimizar uma seção
-  const toggleSection = (sectionTitle) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionTitle]: !prev[sectionTitle]
-    }));
-  };
-
-  // Processar o texto
-  const processedText = processContent(textContent);
   
-  // Extrair seções
-  const sections = extractSections(processedText);
-
-  // Se não há conteúdo, mostra mensagem
-  if (!textContent.trim()) {
-    return <p className="text-gray-500 italic">Nenhum conteúdo de plano disponível.</p>;
-  }
-
+  const sections = parseContent();
+  const sectionIds = sections.map(section => section.id);
+  
   return (
-    <div className="plan-content space-y-4">
-      {sections.map((section, index) => (
-        <div key={index} className="border border-gray-200 rounded-md overflow-hidden">
-          <div 
-            className="flex items-center justify-between cursor-pointer bg-indigo-50 p-3 hover:bg-indigo-100 transition-colors"
-            onClick={() => toggleSection(section.title)}
-          >
-            <h2 className="text-lg font-bold text-indigo-800">
-              {section.title}
-            </h2>
-            <div className="text-indigo-600">
-              {expandedSections[section.title] ? (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+    <div className="plan-content">
+      {/* Botões para expandir/fechar todas as seções */}
+      <div className="flex justify-end mb-4 space-x-2">
+        <button
+          onClick={() => expandAllSections(sectionIds)}
+          className={`inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md ${THEME_COLORS.secondaryBg} ${THEME_COLORS.secondaryText} ${THEME_COLORS.secondaryHover}`}
+        >
+          Expandir Todas
+        </button>
+        <button
+          onClick={collapseAllSections}
+          className={`inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md ${THEME_COLORS.secondaryBg} ${THEME_COLORS.secondaryText} ${THEME_COLORS.secondaryHover}`}
+        >
+          Fechar Todas
+        </button>
+      </div>
+      
+      {/* Renderizar as seções */}
+      {sections.length > 0 ? (
+        <div className="space-y-4">
+          {sections.map((section) => (
+            <div key={section.id} className="border rounded-md overflow-hidden">
+              <div 
+                className={`${THEME_COLORS.primaryBg} ${THEME_COLORS.primaryText} px-4 py-3 cursor-pointer flex justify-between items-center`}
+                onClick={() => toggleSection(section.id)}
+              >
+                <h3 className="text-lg font-medium">
+                  {section.title.replace(/^#+\s*/, '')}
+                </h3>
+                <button
+                  type="button"
+                  className={THEME_COLORS.iconColor}
+                >
+                  {isSectionExpanded(section.id) ? (
+                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+              {isSectionExpanded(section.id) && (
+                <div className="px-4 py-3 bg-white">
+                  <div 
+                    className="prose max-w-none" 
+                    dangerouslySetInnerHTML={{ __html: formatContent(section.content) }}
+                  ></div>
+                </div>
               )}
             </div>
-          </div>
-          
-          {/* Conteúdo da seção (colapsável) */}
-          {expandedSections[section.title] && (
-            <div className="p-4 bg-white">
-              {renderSectionContent(section.content)}
-            </div>
-          )}
+          ))}
         </div>
-      ))}
+      ) : (
+        // Se não conseguirmos analisar as seções, mostramos o conteúdo completo
+        <div 
+          className="prose max-w-none" 
+          dangerouslySetInnerHTML={{ __html: formatContent(content) }}
+        ></div>
+      )}
     </div>
   );
+};
+
+// Função auxiliar para formatar o conteúdo
+// Esta função precisará ser adaptada ao formato real dos seus dados
+const formatContent = (content) => {
+  if (!content) return '';
+  
+  // Substitui os padrões markdown por HTML
+  // Este é um exemplo básico; ajuste conforme necessário
+  
+  let formatted = content
+    // Títulos
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    
+    // Negrito e itálico
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    
+    // Listas
+    .replace(/^\s*\*\s(.*$)/gm, '<li>$1</li>')
+    .replace(/<\/li>\n<li>/g, '</li><li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    
+    // Quebras de linha
+    .replace(/\n/g, '<br />');
+  
+  return formatted;
 };
 
 export default FormattedPlanContent;

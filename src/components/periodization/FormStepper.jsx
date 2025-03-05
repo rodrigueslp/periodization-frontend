@@ -1,3 +1,4 @@
+// src/components/periodization/FormStepper.jsx
 import React, { useState } from 'react';
 import PersonalInfoStep from './PersonalInfoStep';
 import TrainingInfoStep from './TrainingInfoStep';
@@ -6,9 +7,9 @@ import PlanSummary from './PlanSummary';
 import PaymentStep from './PaymentStep';
 import { periodizationService } from '../../services/periodization';
 
-const FormStepper = ({ onSubmit }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) => {
+  const [currentStep, setCurrentStep] = useState(initialStep);
+  const [formData, setFormData] = useState(initialFormData || {
     nome: '',
     idade: '',
     peso: '',
@@ -34,11 +35,17 @@ const FormStepper = ({ onSubmit }) => {
     setFormData({ ...formData, ...data });
   };
 
-  // Em FormStepper.jsx - modificar o método nextStep para o caso de ir do PlanSummary para o PaymentStep
+  // Modificar o método nextStep para o caso de ir do PlanSummary para o PaymentStep
   const nextStep = async () => {
     // Se estiver indo para o passo de pagamento (step 4 -> 5)
     if (currentStep === 4) {
       try {
+        // Se já temos um planId, não precisamos criar um novo plano pendente
+        if (formData.planId) {
+          setCurrentStep(currentStep + 1);
+          return;
+        }
+        
         // Construir o objeto de requisição
         const requestData = {
           athleteData: {
@@ -81,6 +88,7 @@ const FormStepper = ({ onSubmit }) => {
       setCurrentStep(currentStep + 1);
     }
   };
+  
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
   };
@@ -117,17 +125,21 @@ const FormStepper = ({ onSubmit }) => {
       case 4:
         return <PlanSummary formData={formData} prevStep={prevStep} nextStep={nextStep} />;
       case 5:
-        return <PaymentStep formData={formData} prevStep={prevStep} onSubmit={handleSubmit} />;
+        return <PaymentStep formData={formData} prevStep={initialStep === 5 ? null : prevStep} onSubmit={handleSubmit} />;
       default:
         return <PersonalInfoStep formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
     }
   };
 
+  // Mostrar apenas as etapas relevantes
+  // Se iniciar na etapa de pagamento, só mostraremos essa etapa
+  const stepsToShow = initialStep === 5 ? [5] : [1, 2, 3, 4, 5];
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         <div className="flex justify-between items-center">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {stepsToShow.map((step) => (
             <div key={step} className="flex flex-col items-center">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -148,11 +160,13 @@ const FormStepper = ({ onSubmit }) => {
             </div>
           ))}
         </div>
-        <div className="relative mt-2">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-gray-300"></div>
+        {stepsToShow.length > 1 && (
+          <div className="relative mt-2">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {renderStep()}

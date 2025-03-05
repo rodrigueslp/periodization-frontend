@@ -331,14 +331,27 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       </div>
   
       <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={prevStep}
-          disabled={paymentStatus === 'processing'}
-          className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          Voltar
-        </button>
+        {prevStep && ( // Verifica se prevStep existe antes de renderizar o botão
+          <button
+            type="button"
+            onClick={prevStep}
+            disabled={paymentStatus === 'processing'}
+            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            Voltar
+          </button>
+        )}
+        {/* Se não tivermos prevStep, podemos adicionar um link para a lista de planos */}
+        {!prevStep && (
+          <button
+            type="button"
+            onClick={() => navigate('/view-plans')}
+            disabled={paymentStatus === 'processing'}
+            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            Voltar para Meus Planos
+          </button>
+        )}
       </div>
     </div>
   );
