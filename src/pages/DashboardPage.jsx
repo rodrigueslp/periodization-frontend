@@ -146,7 +146,7 @@ const DashboardPage = () => {
             </div>
 
             {/* Gráfico de Distribuição de Objetivos */}
-            <div className="bg-white rounded-lg shadow p-5 mb-8">
+            {/* <div className="bg-white rounded-lg shadow p-5 mb-8">
               <h2 className="text-lg font-medium text-gray-900 mb-4">Status das Periodizações</h2>
               <div className="h-64 flex items-center justify-center">
                 <div className="w-full max-w-md">
@@ -187,7 +187,7 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Planos Pendentes de Geração */}
             {stats.recentPlans.some(plan => plan.canGenerate) && (

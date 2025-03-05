@@ -33,7 +33,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   
   useEffect(() => {
     // Gerar pagamento ao carregar o componente
-    // Em PaymentStep.jsx - modificar o método generatePayment
     const generatePayment = async () => {
       try {
         setPaymentStatus('processing');
@@ -81,7 +80,9 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
     }, 1000);
     
     // Limpar intervalo no unmount
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [formData.planId]);
   
   // Formatar o timer para MM:SS
@@ -135,22 +136,19 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   
   const handleContinue = async () => {
     try {
-      setPaymentStatus('generating');
+      // Enviar solicitação para gerar plano assincronamente
+      await periodizationService.generateApprovedPlan(formData.planId);
       
-      // Gerar o plano após o pagamento aprovado
-      const response = await periodizationService.generateApprovedPlan(formData.planId);
-
-      // Log para debug
-      console.log("Plano gerado com sucesso:", response);
-
-      // Redirecionar diretamente para a página do plano
-      navigate(`/view-plan/${formData.planId}`);
+      // Redirecionar para a página de listagem de planos
+      navigate('/view-plans', { 
+        state: { 
+          message: 'Seu plano foi enviado para geração e estará disponível em breve. Você pode verificar o status na lista de planos.' 
+        } 
+      });
       
-      // Chamar o callback de conclusão
-      // onSubmit();
     } catch (error) {
-      console.error('Erro ao gerar plano:', error);
-      setError('Ocorreu um erro ao gerar o plano. Você pode tentar gerar novamente posteriormente.');
+      console.error('Erro ao enviar plano para geração:', error);
+      setError('Ocorreu um erro ao iniciar a geração do plano. Você pode tentar novamente posteriormente.');
       setPaymentStatus('failed');
     }
   };
@@ -167,6 +165,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           <div className="text-3xl font-bold text-indigo-600 mb-4">R$ 9,90</div>
         </div>
         
+        {/* Pagamento ainda não confirmado */}
         {(paymentStatus === 'pending' && paymentData) && (
           <div className="bg-gray-50 p-6 rounded-lg mb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Pague com PIX</h3>
@@ -273,6 +272,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           </div>
         )}
         
+        {/* Processando pagamento */}
         {paymentStatus === 'processing' && (
           <div className="bg-gray-50 p-6 rounded-lg mb-6 text-center">
             <svg className="animate-spin h-10 w-10 text-indigo-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -283,18 +283,8 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             <p className="text-sm text-gray-600">Estamos processando seu pagamento. Isso pode levar alguns instantes.</p>
           </div>
         )}
-
-        {paymentStatus === 'generating' && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-6 text-center">
-            <svg className="animate-spin h-10 w-10 text-indigo-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Gerando sua periodização...</h3>
-            <p className="text-sm text-gray-600">Estamos criando seu plano personalizado. Isso pode levar alguns minutos.</p>
-          </div>
-        )}
         
+        {/* Pagamento aprovado, pronto para gerar */}
         {paymentStatus === 'success' && (
           <div className="bg-green-50 p-6 rounded-lg mb-6 text-center">
             <div className="rounded-full bg-green-100 h-12 w-12 flex items-center justify-center mx-auto mb-4">
@@ -303,7 +293,12 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Pagamento confirmado!</h3>
-            <p className="text-sm text-gray-600 mb-4">Você já pode gerar seu plano de periodização personalizado.</p>
+            <p className="text-sm text-gray-600 mb-4">
+              Seu pagamento foi confirmado com sucesso. Clique no botão abaixo para iniciar a geração do seu plano personalizado.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              Após solicitar a geração, você será redirecionado para a página de planos, onde poderá acompanhar o status da geração.
+            </p>
             <button
               type="button"
               onClick={handleContinue}
@@ -314,6 +309,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           </div>
         )}
         
+        {/* Falha no pagamento */}
         {paymentStatus === 'failed' && (
           <div className="bg-red-50 p-6 rounded-lg mb-6 text-center">
             <div className="rounded-full bg-red-100 h-12 w-12 flex items-center justify-center mx-auto mb-4">
@@ -346,7 +342,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       </div>
     </div>
   );
-
 };
 
 export default PaymentStep;

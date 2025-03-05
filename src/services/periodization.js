@@ -16,11 +16,12 @@ export const periodizationService = {
     return api.post('/api/periodization', planData);
   },
 
+  // Criar um plano pendente de pagamento
   createPendingPlan: async (planData) => {
     return api.post('/api/periodization', planData);
   },
   
-  // Gerar conteúdo para um plano que já foi pago
+  // Solicitar geração assíncrona de um plano que já foi pago
   generateApprovedPlan: async (planId) => {
     return api.post(`/api/periodization/${planId}/generate`);
   },
