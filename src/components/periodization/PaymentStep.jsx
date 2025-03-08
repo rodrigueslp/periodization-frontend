@@ -11,6 +11,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const PAYMENT_SIMULATION_ENABLED = process.env.NODE_ENV == "development"
+  console.log("PAYMENT_SIMULATION_ENABLED", PAYMENT_SIMULATION_ENABLED);
 
   const simulatePaymentApproval = async () => {
     if (!externalReference) {
