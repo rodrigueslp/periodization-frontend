@@ -65,6 +65,24 @@ const PlanSummary = ({ formData, prevStep, nextStep }) => {
               <dd className="mt-1 text-sm text-gray-900">{formData.disponibilidade} dias por semana</dd>
             </div>
             <div>
+              <dt className="text-sm font-medium text-gray-500">Data de Início</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {formData.startDate ? new Date(formData.startDate).toLocaleDateString('pt-BR') : 'Data atual'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Data de Término Estimada</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {formData.startDate ? 
+                  new Date(new Date(formData.startDate).setDate(
+                    new Date(formData.startDate).getDate() + formData.planDuration * 7
+                  )).toLocaleDateString('pt-BR') : 
+                  new Date(new Date().setDate(
+                    new Date().getDate() + formData.planDuration * 7
+                  )).toLocaleDateString('pt-BR')}
+              </dd>
+            </div>
+            <div>
               <dt className="text-sm font-medium text-gray-500">Duração da Periodização</dt>
               <dd className="mt-1 text-sm text-gray-900">{formData.planDuration} semanas</dd>
             </div>

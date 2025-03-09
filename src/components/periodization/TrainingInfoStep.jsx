@@ -103,6 +103,23 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
             </div>
           </div>
 
+          <div className="sm:col-span-3">
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+              Data de Início do Plano
+            </label>
+            <div className="mt-1">
+              <input
+                type="date"
+                id="startDate"
+                name="startDate"
+                value={formData.startDate || ''}
+                onChange={handleChange}
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              />
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Caso não informado, a data da segunda-feira mais próxima será utilizada</p>
+          </div>
+
           <div className="sm:col-span-6">
             <label htmlFor="lesoes" className="block text-sm font-medium text-gray-700">
               Detalhe seu Objetivo

@@ -12,6 +12,10 @@ body {
   background-color: #f8f9fa;
 }
 
+.logo-login-page {
+  height: 8rem;
+}
+
 /* Este código pode ser adicionado ao seu arquivo global de CSS ou criado como um novo componente */
 
 /* Ajustes para visualização em dispositivos móveis */

@@ -1,8 +1,7 @@
-// src/components/layout/Header.jsx
-
 import React, { useState, useEffect, Fragment } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth';
+import planilizeLogo from '../../assets/images/planilize-logo.png';
 
 const Header = () => {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -55,11 +54,17 @@ const Header = () => {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between h-20">
           <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
+            {/* <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard" className="text-xl sm:text-2xl font-extrabold text-indigo-600">
                 Planilize
+              </Link>
+            </div> */}
+
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/dashboard">
+                <img src={planilizeLogo} alt="Planilize" className="h-14 w-auto" />
               </Link>
             </div>
             

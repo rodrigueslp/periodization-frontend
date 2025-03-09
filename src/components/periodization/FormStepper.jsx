@@ -29,7 +29,8 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
       fran: '',
       grace: ''
     },
-    planDuration: 4
+    planDuration: 4,
+    startDate: ''
   });
 
   const updateFormData = (data) => {
@@ -68,7 +69,8 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
               grace: formData.benchmarks.grace
             }
           },
-          planDuration: formData.planDuration
+          planDuration: formData.planDuration,
+          startDate: formData.startDate
         };
 
         // Criar plano pendente

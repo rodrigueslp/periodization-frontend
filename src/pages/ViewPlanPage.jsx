@@ -289,6 +289,8 @@ const ViewPlanPage = () => {
     injuries: 'Lesões',
     trainingHistory: 'Histórico de Treino',
     planDuration: 'Duração do Plano',
+    startDate: 'Data de Início',
+    endDate: 'Data do Término',
     createdAt: 'Data de Criação'
   };
 
@@ -381,6 +383,22 @@ const ViewPlanPage = () => {
               <dt className="text-sm font-medium text-gray-500">{labels.planDuration}</dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{plan.planDuration} semanas</dd>
             </div>
+            {plan.startDate && (
+              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">{labels.startDate}</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {new Date(plan.startDate).toLocaleDateString('pt-BR')}
+                </dd>
+              </div>
+            )}
+            {plan.endDate && (
+              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt className="text-sm font-medium text-gray-500">{labels.endDate}</dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                  {new Date(plan.endDate).toLocaleDateString('pt-BR')}
+                </dd>
+              </div>
+            )}
             {plan.injuries && (
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">{labels.injuries}</dt>
