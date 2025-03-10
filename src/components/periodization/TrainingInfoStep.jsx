@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
+  // Estado para controlar os contadores de caracteres
+  const [charCounts, setCharCounts] = useState({
+    objetivoDetalhado: formData.objetivoDetalhado ? formData.objetivoDetalhado.length : 0,
+    lesoes: formData.lesoes ? formData.lesoes.length : 0,
+    historico: formData.historico ? formData.historico.length : 0
+  });
+
+  // Atualiza os contadores quando o formData mudar
+  useEffect(() => {
+    setCharCounts({
+      objetivoDetalhado: formData.objetivoDetalhado ? formData.objetivoDetalhado.length : 0,
+      lesoes: formData.lesoes ? formData.lesoes.length : 0,
+      historico: formData.historico ? formData.historico.length : 0
+    });
+  }, [formData]);
+
   const handleChange = (e) => {
-    updateFormData({ [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Limita o texto a 250 caracteres para os campos específicos
+    if (['objetivoDetalhado', 'lesoes', 'historico'].includes(name)) {
+      if (value.length <= 250) {
+        updateFormData({ [name]: value });
+        setCharCounts(prev => ({ ...prev, [name]: value.length }));
+      }
+    } else {
+      updateFormData({ [name]: value });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -121,7 +147,7 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
           </div>
 
           <div className="sm:col-span-6">
-            <label htmlFor="lesoes" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="objetivoDetalhado" className="block text-sm font-medium text-gray-700">
               Detalhe seu Objetivo
             </label>
             <div className="mt-1">
@@ -129,12 +155,16 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
                 id="objetivoDetalhado"
                 name="objetivoDetalhado"
                 rows={3}
-                value={formData.objetivoDetalhado}
+                maxLength={250}
+                value={formData.objetivoDetalhado || ''}
                 onChange={handleChange}
                 placeholder='Descreva detalhadamente seu objetivo, como "Quero aumentar minhas cargas em CLEAN and JERK". Preencha apenas se você quiser focar em algum objetivo especifico.'
                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500 text-right">
+              {charCounts.objetivoDetalhado}/250 caracteres
+            </p>
           </div>
 
           <div className="sm:col-span-6">
@@ -146,12 +176,16 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
                 id="lesoes"
                 name="lesoes"
                 rows={3}
-                value={formData.lesoes}
+                maxLength={250}
+                value={formData.lesoes || ''}
                 onChange={handleChange}
                 placeholder="Descreva qualquer lesão ou limitação física que você tenha"
                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500 text-right">
+              {charCounts.lesoes}/250 caracteres
+            </p>
           </div>
 
           <div className="sm:col-span-6">
@@ -163,12 +197,16 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
                 id="historico"
                 name="historico"
                 rows={3}
-                value={formData.historico}
+                maxLength={250}
+                value={formData.historico || ''}
                 onChange={handleChange}
                 placeholder="Descreva brevemente sua experiência anterior com CrossFit ou outros esportes"
                 className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
               />
             </div>
+            <p className="mt-1 text-xs text-gray-500 text-right">
+              {charCounts.historico}/250 caracteres
+            </p>
           </div>
         </div>
       </div>
