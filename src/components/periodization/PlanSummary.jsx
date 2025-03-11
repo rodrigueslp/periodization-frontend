@@ -23,6 +23,13 @@ const PlanSummary = ({ formData, prevStep, nextStep }) => {
     geral: 'Condicionamento Geral'
   };
 
+  const periodoTreinoLabels = {
+    manha: 'Manhã',
+    tarde: 'Tarde',
+    noite: 'Noite',
+    variado: 'Variado'
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white shadow overflow-hidden rounded-lg">
@@ -63,6 +70,18 @@ const PlanSummary = ({ formData, prevStep, nextStep }) => {
             <div>
               <dt className="text-sm font-medium text-gray-500">Disponibilidade Semanal</dt>
               <dd className="mt-1 text-sm text-gray-900">{formData.disponibilidade} dias por semana</dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Tipo de Treino</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {formData.treinoPrincipal ? 'Principal' : 'Complementar ao box'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Período de Treino</dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {formData.periodoTreino ? periodoTreinoLabels[formData.periodoTreino] : 'Não informado'}
+              </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Data de Início</dt>

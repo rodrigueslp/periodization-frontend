@@ -21,6 +21,8 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
     disponibilidade: '',
     lesoes: '',
     historico: '',
+    treinoPrincipal: false,
+    periodoTreino: '',
     benchmarks: {
       backSquat: '',
       deadlift: '',
@@ -60,6 +62,8 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
             disponibilidade: parseInt(formData.disponibilidade),
             lesoes: formData.lesoes,
             historico: formData.historico,
+            treinoPrincipal: formData.treinoPrincipal || false,
+            periodoTreino: formData.periodoTreino || null,
             benchmarks: {
               backSquat: formData.benchmarks.backSquat ? parseFloat(formData.benchmarks.backSquat) : null,
               deadlift: formData.benchmarks.deadlift ? parseFloat(formData.benchmarks.deadlift) : null,
@@ -103,6 +107,8 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
       peso: parseFloat(formData.peso),
       altura: parseInt(formData.altura),
       disponibilidade: parseInt(formData.disponibilidade),
+      treinoPrincipal: Boolean(formData.treinoPrincipal),
+      periodoTreino: formData.periodoTreino || null,
       benchmarks: {
         ...formData.benchmarks,
         backSquat: formData.benchmarks.backSquat ? parseFloat(formData.benchmarks.backSquat) : null,

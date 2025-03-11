@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { periodizationService } from '../services/periodization';
+import { feedbackService } from '../services/feedback';
 import { useNavigate } from 'react-router-dom';
 import GeneratingProgress from '../components/training/GeneratingProgress';
 import MiniProgress from '../components/ui/MiniProgress';
+import FeedbackCard from '../components/feedback/FeedbackCard';
 
 const DashboardPage = () => {
   const [stats, setStats] = useState({
@@ -15,6 +17,7 @@ const DashboardPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [generatingPlanId, setGeneratingPlanId] = useState(null);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
   
   const navigate = useNavigate();
 
@@ -30,6 +33,22 @@ const DashboardPage = () => {
       // Mostrar mensagem de erro se necessário
     } finally {
       setGeneratingPlanId(null);
+    }
+  };
+
+  const handleFeedbackSubmit = async (feedbackData) => {
+    try {
+      await feedbackService.submitFeedback(feedbackData);
+      setFeedbackSuccess(true);
+      
+      setTimeout(() => {
+        setFeedbackSuccess(false);
+      }, 5000);
+      
+      return true;
+    } catch (error) {
+      console.error('Erro ao enviar feedback:', error);
+      return false;
     }
   };
 
@@ -94,6 +113,21 @@ const DashboardPage = () => {
           Visão geral das suas periodizações de treino
         </p>
       </div>
+
+      {feedbackSuccess && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-green-700">Feedback enviado com sucesso! Obrigado por contribuir para a evolução da plataforma.</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -198,7 +232,7 @@ const DashboardPage = () => {
           )}
 
           {/* Periodizações Recentes */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-hidden mb-6 sm:mb-8">
             <div className="px-4 py-4 sm:px-6 border-b border-gray-200">
               <h3 className="text-base sm:text-lg font-medium text-gray-900">
                 Periodizações Recentes
@@ -271,6 +305,11 @@ const DashboardPage = () => {
                 </Link>
               </div>
             )}
+          </div>
+
+          {/* Componente de Feedback (agora colocado por último) */}
+          <div className="mb-6 sm:mb-8">
+            <FeedbackCard onSubmit={handleFeedbackSubmit} />
           </div>
         </>
       )}

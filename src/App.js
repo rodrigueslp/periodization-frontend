@@ -10,6 +10,8 @@ import ViewPlanPage from './pages/ViewPlanPage';
 import PlansListPage from './pages/PlansListPage';
 // Importe o novo componente de redirecionamento de pagamento
 import PaymentRedirect from './components/payment/PaymentRedirect';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 
 // Serviços
 import api from './services/api';
@@ -128,6 +130,25 @@ function App() {
             element={
               <PrivateRoute>
                 <PaymentRedirect />
+              </PrivateRoute>
+            } 
+          />
+
+          {/* Novas rotas para perfil e configurações */}
+          <Route 
+            path="/profile" 
+            element={
+              <PrivateRoute>
+                <ProfilePage />
+              </PrivateRoute>
+            } 
+          />
+
+          <Route 
+            path="/settings" 
+            element={
+              <PrivateRoute>
+                <SettingsPage />
               </PrivateRoute>
             } 
           />

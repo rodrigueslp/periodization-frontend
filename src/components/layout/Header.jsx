@@ -56,12 +56,6 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex">
-            {/* <div className="flex-shrink-0 flex items-center">
-              <Link to="/dashboard" className="text-xl sm:text-2xl font-extrabold text-indigo-600">
-                Planilize
-              </Link>
-            </div> */}
-
             <div className="flex-shrink-0 flex items-center">
               <Link to="/dashboard">
                 <img src={planilizeLogo} alt="Planilize" className="h-14 w-auto" />
@@ -119,9 +113,17 @@ const Header = () => {
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 >
                   <span className="sr-only">Abrir menu do usuário</span>
-                  <div className="h-8 w-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-600 font-semibold">
-                    {userData && userData.name ? userData.name.charAt(0).toUpperCase() : 'U'}
-                  </div>
+                  {userData && userData.profilePicture ? (
+                    <img 
+                      className="h-8 w-8 rounded-full object-cover"
+                      src={userData.profilePicture}
+                      alt={userData.name || 'Usuário'}
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-600 font-semibold">
+                      {userData && userData.name ? userData.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
                 </button>
               </div>
               

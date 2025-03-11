@@ -18,7 +18,13 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
   }, [formData]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
+    // Para inputs do tipo checkbox, usar o valor checked
+    if (type === 'checkbox') {
+      updateFormData({ [name]: checked });
+      return;
+    }
     
     // Limita o texto a 250 caracteres para os campos específicos
     if (['objetivoDetalhado', 'lesoes', 'historico'].includes(name)) {
@@ -144,6 +150,46 @@ const TrainingInfoStep = ({ formData, updateFormData, nextStep, prevStep }) => {
               />
             </div>
             <p className="mt-1 text-xs text-gray-500">Caso não informado, a data da segunda-feira mais próxima será utilizada</p>
+          </div>
+
+          <div className="sm:col-span-3">
+            <label htmlFor="periodoTreino" className="block text-sm font-medium text-gray-700">
+              Período de Treino
+            </label>
+            <div className="mt-1">
+              <select
+                id="periodoTreino"
+                name="periodoTreino"
+                value={formData.periodoTreino || ''}
+                onChange={handleChange}
+                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              >
+                <option value="">Selecione o período</option>
+                <option value="manha">Manhã</option>
+                <option value="tarde">Tarde</option>
+                <option value="noite">Noite</option>
+                <option value="variado">Variado</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="sm:col-span-6">
+            <div className="relative flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="treinoPrincipal"
+                  name="treinoPrincipal"
+                  type="checkbox"
+                  checked={formData.treinoPrincipal || false}
+                  onChange={handleChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+              </div>
+              <div className="ml-3 text-sm">
+                <label htmlFor="treinoPrincipal" className="font-medium text-gray-700">Treino Principal</label>
+                <p className="text-gray-500">Marque esta opção se esta periodização será sua principal fonte de treino. Desmarque se ela será complementar ao treino do seu box.</p>
+              </div>
+            </div>
           </div>
 
           <div className="sm:col-span-6">
