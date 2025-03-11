@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import FormattedPlanContent from '../components/training/FormattedPlanContent';
+import GeneratingProgress from '../components/training/GeneratingProgress';
 import { periodizationService } from '../services/periodization';
+import MiniProgress from '../components/ui/MiniProgress';
+import { formatDateSafely } from '../utils/dateUtils';
 
 const ViewPlanPage = () => {
   const [plan, setPlan] = useState(null);
@@ -174,13 +177,7 @@ const ViewPlanPage = () => {
                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
                   >
                     {generatingPlan ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Iniciando Geração...
-                      </>
+                      <MiniProgress className="mx-2" />
                     ) : (
                       'Gerar Meu Plano'
                     )}
@@ -194,18 +191,18 @@ const ViewPlanPage = () => {
       case 'QUEUED':
         return (
           <div className="bg-indigo-50 p-4 rounded-md mt-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row">
+              <div className="flex-shrink-0 mb-2 sm:mb-0">
                 <svg className="h-5 w-5 text-indigo-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zM3 7a1 1 0 000 2h5a1 1 0 000-2H3zM3 11a1 1 0 100 2h4a1 1 0 100-2H3zM13 16a1 1 0 102 0v-5.586l1.293 1.293a1 1 0 001.414-1.414l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 101.414 1.414L13 10.414V16z" />
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="sm:ml-3 flex-grow">
                 <h3 className="text-sm font-medium text-indigo-800">Plano na Fila de Processamento</h3>
                 <div className="mt-2 text-sm text-indigo-700">
                   <p>Seu plano está na fila e será gerado em breve. Esta página atualizará automaticamente quando o processo for concluído.</p>
-                  <p className="mt-2">Você pode sair desta página e verificar o status posteriormente.</p>
                 </div>
+                <GeneratingProgress status={plan.status} compact={false} />
                 <div className="mt-4">
                   <Link
                     to="/view-plans"
@@ -222,19 +219,19 @@ const ViewPlanPage = () => {
       case 'GENERATING':
         return (
           <div className="bg-purple-50 p-4 rounded-md mt-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
+            <div className="flex flex-col sm:flex-row">
+              <div className="flex-shrink-0 mb-2 sm:mb-0">
                 <svg className="animate-spin h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
               </div>
-              <div className="ml-3">
+              <div className="sm:ml-3 flex-grow">
                 <h3 className="text-sm font-medium text-purple-800">Gerando Seu Plano</h3>
                 <div className="mt-2 text-sm text-purple-700">
                   <p>Estamos gerando seu plano personalizado. Isso pode levar alguns minutos.</p>
-                  <p className="mt-2">Esta página atualizará automaticamente quando o processo for concluído.</p>
                 </div>
+                <GeneratingProgress status={plan.status} compact={false} />
                 <div className="mt-4">
                   <Link
                     to="/view-plans"
@@ -387,7 +384,7 @@ const ViewPlanPage = () => {
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">{labels.startDate}</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {new Date(plan.startDate).toLocaleDateString('pt-BR')}
+                    {formatDateSafely(plan.startDate)}
                 </dd>
               </div>
             )}
@@ -395,7 +392,7 @@ const ViewPlanPage = () => {
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">{labels.endDate}</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {new Date(plan.endDate).toLocaleDateString('pt-BR')}
+                  {formatDateSafely(plan.endDate)}
                 </dd>
               </div>
             )}

@@ -66,6 +66,27 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  
+  /* Estilos para o componente de progresso em dispositivos móveis */
+  .mobile-progress-container {
+    padding: 0.75rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  .mobile-progress-text {
+    font-size: 0.75rem !important;
+  }
+  
+  .mobile-progress-step {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  
+  .mobile-progress-indicator {
+    height: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
 }
 
 /* Ajustes específicos para iPhone */

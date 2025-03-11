@@ -7,11 +7,6 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center items-center py-12 sm:px-6 lg:px-8">
       <div className="text-center max-w-md w-full">
         {/* Logo */}
-        {/* <div className="flex justify-center mb-8">
-          <div className="w-64 h-16 flex items-center justify-center">
-            <span className="text-5xl font-extrabold text-indigo-600 tracking-tight">Planilize</span>
-          </div>
-        </div> */}
         <div className="flex justify-center mb-8">
           <div className="w-64 h-20 flex items-center justify-center">
             <img src={planilizeLogo} alt="Planilize" className="logo-login-page w-auto" />

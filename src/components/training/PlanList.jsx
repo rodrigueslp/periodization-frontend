@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { periodizationService } from '../../services/periodization';
+import GeneratingProgress from '../../components/training/GeneratingProgress'
+import { formatDateSafely } from '../../utils/dateUtils';
 
 const PlanList = ({ plans, loading, error }) => {
   if (loading) {
@@ -176,13 +178,13 @@ const PlanList = ({ plans, loading, error }) => {
             Iniciar Geração
           </Link>
         );
-      case 'QUEUED':
-      case 'GENERATING':
-        return (
-          <span className="text-sm text-gray-500">
-            Gerando...
-          </span>
-        );
+        case 'QUEUED':
+        case 'GENERATING':
+          return (
+            <div className="w-full">
+              <GeneratingProgress status={plan.status} compact={true} />
+            </div>
+          );
       case 'COMPLETED':
         return (
           <div className="flex space-x-2">
@@ -224,6 +226,7 @@ const PlanList = ({ plans, loading, error }) => {
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-md">
       <ul className="divide-y divide-gray-200">
+        {console.log(sortedPlans)}
         {sortedPlans.map((plan) => (
           <li key={plan.planId} className={`px-6 py-4 ${(plan.status === 'QUEUED' || plan.status === 'GENERATING') ? 'bg-indigo-50' : ''}`}>
             <div className="flex items-center justify-between">
@@ -237,8 +240,8 @@ const PlanList = ({ plans, loading, error }) => {
                   </svg>
                   <span>
                     {plan.startDate && plan.endDate ? 
-                      `${new Date(plan.startDate).toLocaleDateString('pt-BR')} a ${new Date(plan.endDate).toLocaleDateString('pt-BR')}` : 
-                      `Criado em ${new Date(plan.createdAt).toLocaleDateString('pt-BR')}`}
+                      `${formatDateSafely(plan.startDate)} a ${formatDateSafely(plan.endDate)}` : 
+                      `Criado em ${formatDateSafely(plan.createdAt)}`}
                   </span>
                 </div>
                 <div className="mt-2">
