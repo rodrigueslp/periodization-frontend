@@ -150,8 +150,20 @@ async function fetchAPI(endpoint, options = {}) {
     
     // Verifica se a resposta foi bem-sucedida
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Erro: ${response.status} ${response.statusText}`);
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || errorData.message || `Erro: ${response.status} ${response.statusText}`);
+        } else {
+          throw new Error(`Erro: ${response.status} ${response.statusText}`);
+        }
+      } catch (jsonError) {
+        if (jsonError instanceof SyntaxError) {
+          throw new Error(`Erro: ${response.status} ${response.statusText}`);
+        }
+        throw jsonError;
+      }
     }
 
     // Para download de arquivos, retorna o blob diretamente

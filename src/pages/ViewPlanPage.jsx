@@ -13,7 +13,8 @@ const ViewPlanPage = () => {
   const [error, setError] = useState(null);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const { planId } = useParams();
-  const navigate = useNavigate();
+  const [downloadError, setDownloadError] = useState(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
 
   // Polling para atualização automática caso o plano esteja em geração
   useEffect(() => {
@@ -54,9 +55,35 @@ const ViewPlanPage = () => {
 
   const handleDownload = async () => {
     try {
+      setDownloadError(null);
+      setTooltipVisible(false);
       await periodizationService.downloadPlan(planId);
     } catch (err) {
-      setError('Erro ao baixar o arquivo. Por favor, tente novamente.');
+      console.error('Erro download Excel:', err);
+      setDownloadError(err.message || 'Erro ao baixar o arquivo Excel. Por favor, tente novamente.');
+      setTooltipVisible(true);
+      
+      // Esconder o tooltip após 5 segundos
+      setTimeout(() => {
+        setTooltipVisible(false);
+      }, 5000);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setDownloadError(null);
+      setTooltipVisible(false);
+      await periodizationService.downloadPlanPdf(planId);
+    } catch (err) {
+      console.error('Erro download PDF:', err);
+      setDownloadError(err.message || 'Erro ao baixar o arquivo PDF. Por favor, tente novamente.');
+      setTooltipVisible(true);
+      
+      // Esconder o tooltip após 5 segundos
+      setTimeout(() => {
+        setTooltipVisible(false);
+      }, 5000);
     }
   };
 
@@ -317,6 +344,22 @@ const ViewPlanPage = () => {
     <Layout>
       {/* Seção de status do plano */}
       {renderPlanStatusSection()}
+
+      {/* Exibir mensagem de erro de download se houver */}
+      {downloadError && (
+        <div className="mt-3 rounded-md bg-amber-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-amber-700">{downloadError}</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-6">
         <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
@@ -329,16 +372,54 @@ const ViewPlanPage = () => {
             </p>
           </div>
           {showContent && (
-            <div>
-              <button
-                onClick={handleDownload}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download Excel
-              </button>
+            <div className="relative">
+              <div className="flex space-x-2">
+                {plan.excelFilePath && (
+                    <button
+                    onClick={handleDownload}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download Excel
+                  </button>
+                )}
+                {plan.pdfFilePath && (
+                  <button
+                    onClick={handleDownloadPdf}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download PDF
+                  </button>
+                )}
+              </div>
+              {/* Tooltip de erro */}
+              {tooltipVisible && downloadError && (
+                <div className="absolute z-10 -bottom-16 right-0 bg-amber-50 text-amber-700 border border-amber-200 rounded-md shadow-lg px-4 py-2 max-w-xs animate-fade-in-up">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 mt-0.5">
+                      <svg className="h-4 w-4 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-2">
+                      <p className="text-xs">{downloadError}</p>
+                    </div>
+                    <button 
+                      onClick={() => setTooltipVisible(false)}
+                      className="ml-2 text-amber-400 hover:text-amber-600"
+                    >
+                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

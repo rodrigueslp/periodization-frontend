@@ -1,10 +1,16 @@
 import React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { periodizationService } from '../../services/periodization';
 import GeneratingProgress from '../../components/training/GeneratingProgress'
 import { formatDateSafely } from '../../utils/dateUtils';
 
 const PlanList = ({ plans, loading, error }) => {
+
+  const [downloadError, setDownloadError] = useState(null);
+  const [errorPlanId, setErrorPlanId] = useState(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -68,8 +74,43 @@ const PlanList = ({ plans, loading, error }) => {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
-  const handleDownloadPlan = (planId) => {
-    periodizationService.downloadPlan(planId);
+  const handleDownloadPlan = async (planId) => {
+    try {
+      setDownloadError(null);
+      setErrorPlanId(null);
+      setTooltipVisible(false);
+      await periodizationService.downloadPlan(planId);
+    } catch (err) {
+      console.error('Erro download Excel:', err);
+      setDownloadError(err.message || 'Erro ao baixar o arquivo Excel.');
+      setErrorPlanId(planId);
+      setTooltipVisible(true);
+      
+      // Esconder o tooltip após 5 segundos
+      setTimeout(() => {
+        setTooltipVisible(false);
+      }, 5000);
+    }
+  };
+  
+
+  const handleDownloadPlanPdf = async (planId) => {
+    try {
+      setDownloadError(null);
+      setErrorPlanId(null);
+      setTooltipVisible(false);
+      await periodizationService.downloadPlanPdf(planId);
+    } catch (err) {
+      console.error('Erro download PDF:', err);
+      setDownloadError(err.message || 'Erro ao baixar o arquivo PDF.');
+      setErrorPlanId(planId);
+      setTooltipVisible(true);
+      
+      // Esconder o tooltip após 5 segundos
+      setTimeout(() => {
+        setTooltipVisible(false);
+      }, 5000);
+    }
   };
 
   // Função para gerar o badge de status
@@ -185,23 +226,61 @@ const PlanList = ({ plans, loading, error }) => {
               <GeneratingProgress status={plan.status} compact={true} />
             </div>
           );
-      case 'COMPLETED':
-        return (
-          <div className="flex space-x-2">
-            <Link
-              to={`/view-plan/${plan.planId}`}
-              className="text-sm text-indigo-600 hover:text-indigo-900"
-            >
-              Ver Plano
-            </Link>
-            <button
-              onClick={() => handleDownloadPlan(plan.planId)}
-              className="text-sm text-green-600 hover:text-green-900"
-            >
-              Download Excel
-            </button>
-          </div>
-        );
+        case 'COMPLETED':
+          return (
+            <div className="relative">
+              <div className="flex space-x-2">
+                <Link
+                  to={`/view-plan/${plan.planId}`}
+                  className="text-sm text-indigo-600 hover:text-indigo-900"
+                >
+                  Ver Plano
+                </Link>
+                <div className="flex space-x-2">
+                  {plan.excelFilePath && (
+                    <button
+                      onClick={() => handleDownloadPlan(plan.planId)}
+                      className="text-sm text-green-600 hover:text-green-900"
+                    >
+                      Excel
+                    </button>
+                  )}
+                  {plan.pdfFilePath && (
+                    <button
+                      onClick={() => handleDownloadPlanPdf(plan.planId)}
+                      className="text-sm text-red-600 hover:text-red-900"
+                    >
+                      PDF
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Tooltip para exibir mensagem de erro */}
+              {tooltipVisible && errorPlanId === plan.planId && downloadError && (
+                <div className="absolute z-10 -bottom-12 right-0 bg-amber-50 text-amber-700 border border-amber-200 rounded-md shadow-lg px-3 py-1 max-w-xs animate-fade-in-up">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <svg className="h-3 w-3 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-1.5">
+                      <p className="text-xs">{downloadError}</p>
+                    </div>
+                    <button 
+                      onClick={() => setTooltipVisible(false)}
+                      className="ml-1.5 text-amber-400 hover:text-amber-600"
+                    >
+                      <svg className="h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
       case 'FAILED':
         return (
           <Link
