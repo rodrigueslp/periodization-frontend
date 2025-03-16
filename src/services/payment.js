@@ -19,5 +19,9 @@ export const paymentService = {
   // Obter histórico de pagamentos do usuário
   getUserPayments: async () => {
     return api.get('/api/payments');
+  },
+
+  canSimulatePayment: async () => {
+    return api.get('/api/payments/can-simulate');
   }
 };

@@ -10,8 +10,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   const [timer, setTimer] = useState(900); // 15 minutos em segundos
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const PAYMENT_SIMULATION_ENABLED = process.env.NODE_ENV == "development"
-  console.log("PAYMENT_SIMULATION_ENABLED", PAYMENT_SIMULATION_ENABLED);
+  const [canSimulatePayment, setCanSimulatePayment] = useState(false);
 
   const simulatePaymentApproval = async () => {
     if (!externalReference) {
@@ -67,8 +66,19 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         setPaymentStatus('failed');
       }
     };
+
+    const checkSimulationPermission = async () => {
+      try {
+        const response = await paymentService.canSimulatePayment();
+        setCanSimulatePayment(response.canSimulate);
+      } catch (error) {
+        console.error('Erro ao verificar permissão de simulação:', error);
+        setCanSimulatePayment(false);
+      }
+    };
     
     generatePayment();
+    checkSimulationPermission();
     
     // Iniciar timer
     const interval = setInterval(() => {
@@ -233,7 +243,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             </div>
             
             {/* Bloco de simulação de pagamento */}
-            {PAYMENT_SIMULATION_ENABLED && (
+            {canSimulatePayment  && (
               <div className="rounded-md bg-yellow-50 p-4 mb-6">
                 <div className="flex">
                   <div className="flex-shrink-0">
