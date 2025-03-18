@@ -33,6 +33,24 @@ export const feedbackService = {
       console.error('Erro ao buscar feedbacks do usuário:', error);
       throw error;
     }
+  },
+
+  /**
+   * Obtém todos os feedbacks (apenas para administradores)
+   * @param {string} [type] - Filtro opcional por tipo de feedback
+   * @returns {Promise<Array>} - Lista de todos os feedbacks
+   */
+  getAllFeedbacks: async (type) => {
+    try {
+      const endpoint = type 
+        ? `/api/feedback/admin/all?type=${type}` 
+        : '/api/feedback/admin/all';
+      const response = await api.get(endpoint);
+      return response;
+    } catch (error) {
+      console.error('Erro ao buscar todos os feedbacks:', error);
+      throw error;
+    }
   }
 };
 

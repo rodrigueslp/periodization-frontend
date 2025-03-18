@@ -23,5 +23,9 @@ export const paymentService = {
 
   canSimulatePayment: async () => {
     return api.get('/api/payments/can-simulate');
+  },
+
+  getAllPayments: async () => {
+    return api.get('/api/payments/admin');
   }
 };

@@ -368,13 +368,13 @@ const ViewPlanPage = () => {
               Plano de Periodização para {plan.athleteName}
             </h3>
             <p className="mt-1 max-w-2xl text-sm text-gray-500">
-              Criado em {new Date(plan.createdAt).toLocaleDateString('pt-BR')}
+              Criado em {plan.createdAt}
             </p>
           </div>
           {showContent && (
             <div className="relative">
               <div className="flex space-x-2">
-                {plan.excelFilePath && (
+                {/* {plan.excelFilePath (
                     <button
                     onClick={handleDownload}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -384,7 +384,7 @@ const ViewPlanPage = () => {
                     </svg>
                     Download Excel
                   </button>
-                )}
+                )} */}
                 {plan.pdfFilePath && (
                   <button
                     onClick={handleDownloadPdf}

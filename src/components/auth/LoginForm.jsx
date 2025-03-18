@@ -11,10 +11,7 @@ const LoginForm = () => {
     e.preventDefault();
     setError('');
     
-    try {
-      // Aqui irá a integração real com a autenticação no futuro
-      console.log('Login com:', email, password);
-      
+    try {      
       // Por enquanto, simularemos um login bem-sucedido
       localStorage.setItem('isAuthenticated', 'true');
       navigate('/dashboard');

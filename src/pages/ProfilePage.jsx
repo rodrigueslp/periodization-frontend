@@ -92,7 +92,7 @@ const ProfilePage = () => {
                     <svg className="-ml-1 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
                       <circle cx="4" cy="4" r="3" />
                     </svg>
-                    Assinatura {userData.subscriptionPlan || 'Pro'} Ativa
+                      Ativo
                   </span>
                 ) : (
                   <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
@@ -127,7 +127,7 @@ const ProfilePage = () => {
                   </dd>
                 </div>
               </div>
-              <div className="bg-gray-50 overflow-hidden shadow rounded-lg">
+              {/* <div className="bg-gray-50 overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <dt className="text-sm font-medium text-gray-500 truncate">
                     {userData?.hasActiveSubscription ? 'Assinatura Válida Até' : 'Status da Assinatura'}
@@ -138,7 +138,7 @@ const ProfilePage = () => {
                       : 'Sem assinatura ativa'}
                   </dd>
                 </div>
-              </div>
+              </div> */}
             </dl>
           </div>
         </div>

@@ -8,13 +8,17 @@ import DashboardPage from './pages/DashboardPage';
 import CreatePlanPage from './pages/CreatePlanPage';
 import ViewPlanPage from './pages/ViewPlanPage';
 import PlansListPage from './pages/PlansListPage';
-// Importe o novo componente de redirecionamento de pagamento
 import PaymentRedirect from './components/payment/PaymentRedirect';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 
+// Páginas administrativas
+import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
+import AdminFeedbacksPage from './pages/admin/AdminFeedbacksPage';
+
 // Serviços
 import api from './services/api';
+import { authService } from './services/auth';
 
 // Auth Guard - componente para proteger rotas
 const PrivateRoute = ({ children }) => {
@@ -22,6 +26,23 @@ const PrivateRoute = ({ children }) => {
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// Admin Guard - componente para proteger rotas administrativas
+const AdminRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const userData = authService.getUserData();
+  const isAdmin = userData && userData.roles && userData.roles.includes('ROLE_ADMIN');
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return children;
@@ -124,7 +145,7 @@ function App() {
             } 
           />
           
-          {/* Nova rota para redirecionamento de pagamento */}
+          {/* Rota para redirecionamento de pagamento */}
           <Route 
             path="/payment-redirect" 
             element={
@@ -134,7 +155,7 @@ function App() {
             } 
           />
 
-          {/* Novas rotas para perfil e configurações */}
+          {/* Rotas para perfil e configurações */}
           <Route 
             path="/profile" 
             element={
@@ -150,6 +171,25 @@ function App() {
               <PrivateRoute>
                 <SettingsPage />
               </PrivateRoute>
+            } 
+          />
+
+          {/* Novas rotas administrativas */}
+          <Route 
+            path="/admin/payments" 
+            element={
+              <AdminRoute>
+                <AdminPaymentsPage />
+              </AdminRoute>
+            } 
+          />
+
+          <Route 
+            path="/admin/feedbacks" 
+            element={
+              <AdminRoute>
+                <AdminFeedbacksPage />
+              </AdminRoute>
             } 
           />
         </Routes>

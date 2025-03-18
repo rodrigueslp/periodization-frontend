@@ -237,14 +237,14 @@ const PlanList = ({ plans, loading, error }) => {
                   Ver Plano
                 </Link>
                 <div className="flex space-x-2">
-                  {plan.excelFilePath && (
+                  {/* {plan.excelFilePath && (
                     <button
                       onClick={() => handleDownloadPlan(plan.planId)}
                       className="text-sm text-green-600 hover:text-green-900"
                     >
                       Excel
                     </button>
-                  )}
+                  )} */}
                   {plan.pdfFilePath && (
                     <button
                       onClick={() => handleDownloadPlanPdf(plan.planId)}
@@ -305,7 +305,6 @@ const PlanList = ({ plans, loading, error }) => {
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-md">
       <ul className="divide-y divide-gray-200">
-        {console.log(sortedPlans)}
         {sortedPlans.map((plan) => (
           <li key={plan.planId} className={`px-6 py-4 ${(plan.status === 'QUEUED' || plan.status === 'GENERATING') ? 'bg-indigo-50' : ''}`}>
             <div className="flex items-center justify-between">

@@ -55,7 +55,7 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
             nome: formData.nome,
             idade: parseInt(formData.idade),
             peso: parseFloat(formData.peso),
-            altura: parseFloat(formData.altura),
+            altura: parseFloat(formData.altura.replace(".", "").replace(",", "")),
             experiencia: formData.experiencia,
             objetivo: formData.objetivo,
             objetivoDetalhado: formData.objetivoDetalhado,
