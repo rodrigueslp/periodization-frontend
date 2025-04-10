@@ -98,13 +98,13 @@ const Header = () => {
                 to="/create-plan"
                 className={getActiveClass('/create-plan')}
               >
-                Nova Periodização
+                Novo Plano
               </Link>
               <Link
                 to="/view-plans"
                 className={getActiveClass('/view-plans')}
               >
-                Minhas Periodizações
+                Meus Planos
               </Link>
               
               {/* Menu administrativo - apenas para admins */}
@@ -232,13 +232,13 @@ const Header = () => {
               to="/create-plan"
               className={getMobileActiveClass('/create-plan')}
             >
-              Nova Periodização
+              Novo Plano
             </Link>
             <Link
               to="/view-plans"
               className={getMobileActiveClass('/view-plans')}
             >
-              Minhas Periodizações
+              Meus Planos
             </Link>
             
             {/* Links administrativos para mobile - apenas para admins */}

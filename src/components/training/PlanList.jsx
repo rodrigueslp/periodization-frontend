@@ -2,7 +2,8 @@ import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { periodizationService } from '../../services/periodization';
-import GeneratingProgress from '../../components/training/GeneratingProgress'
+import { strengthTrainingService } from '../../services/strengthTraining';
+import GeneratingProgress from '../../components/training/GeneratingProgress';
 import { formatDateSafely } from '../../utils/dateUtils';
 
 const PlanList = ({ plans, loading, error }) => {
@@ -15,7 +16,7 @@ const PlanList = ({ plans, loading, error }) => {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-        <span className="ml-3 text-gray-600">Carregando periodizações...</span>
+        <span className="ml-3 text-gray-600">Carregando planos...</span>
       </div>
     );
   }
@@ -45,7 +46,7 @@ const PlanList = ({ plans, loading, error }) => {
         </svg>
         <h3 className="mt-2 text-sm font-medium text-gray-900">Nenhum plano encontrado</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Comece criando seu primeiro plano de periodização.
+          Comece criando seu primeiro plano de treinamento.
         </p>
         <div className="mt-6">
           <Link
@@ -58,6 +59,11 @@ const PlanList = ({ plans, loading, error }) => {
       </div>
     );
   }
+
+  // Função para obter o caminho correto com base no tipo de plano
+  const getPlanViewPath = (planId, planType) => {
+    return planType === 'STRENGTH' ? `/view-strength-plan/${planId}` : `/view-plan/${planId}`;
+  };
 
   // Ordenar planos: Primeiro os que estão em geração, depois os mais recentes
   const sortedPlans = [...plans].sort((a, b) => {
@@ -74,15 +80,20 @@ const PlanList = ({ plans, loading, error }) => {
     return new Date(b.createdAt) - new Date(a.createdAt);
   });
 
-  const handleDownloadPlan = async (planId) => {
+  const handleDownloadPlan = async (planId, planType) => {
     try {
       setDownloadError(null);
       setErrorPlanId(null);
       setTooltipVisible(false);
-      await periodizationService.downloadPlan(planId);
+      
+      if (planType === 'STRENGTH') {
+        await strengthTrainingService.downloadPlan(planId);
+      } else {
+        await periodizationService.downloadPlan(planId);
+      }
     } catch (err) {
       console.error('Erro download Excel:', err);
-      setDownloadError(err.message || 'Erro ao baixar o arquivo Excel.');
+      setDownloadError(err.message || 'Erro ao baixar o arquivo Excel. Por favor, tente novamente.');
       setErrorPlanId(planId);
       setTooltipVisible(true);
       
@@ -94,15 +105,20 @@ const PlanList = ({ plans, loading, error }) => {
   };
   
 
-  const handleDownloadPlanPdf = async (planId) => {
+  const handleDownloadPlanPdf = async (planId, planType) => {
     try {
       setDownloadError(null);
       setErrorPlanId(null);
       setTooltipVisible(false);
-      await periodizationService.downloadPlanPdf(planId);
+      
+      if (planType === 'STRENGTH') {
+        await strengthTrainingService.downloadPlanPdf(planId);
+      } else {
+        await periodizationService.downloadPlanPdf(planId);
+      }
     } catch (err) {
       console.error('Erro download PDF:', err);
-      setDownloadError(err.message || 'Erro ao baixar o arquivo PDF.');
+      setDownloadError(err.message || 'Erro ao baixar o arquivo PDF. Por favor, tente novamente.');
       setErrorPlanId(planId);
       setTooltipVisible(true);
       
@@ -198,13 +214,39 @@ const PlanList = ({ plans, loading, error }) => {
     );
   };
 
+  // Função para renderizar o badge de tipo de plano
+  const renderTypeBadge = (planType) => {
+    if (planType === 'STRENGTH') {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-green-100 text-green-800 ml-2">
+          <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          Musculação
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800 ml-2">
+          <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          CrossFit
+        </span>
+      );
+    }
+  };
+
   // Função para gerar a ação adequada com base no status
   const renderActionButton = (plan) => {
+    const planType = plan.planType || 'CROSSFIT';
+    const viewPath = getPlanViewPath(plan.planId, planType);
+    
     switch (plan.status) {
       case 'PAYMENT_PENDING':
         return (
           <Link
-            to={`/view-plan/${plan.planId}`}
+            to={viewPath}
             className="text-sm text-indigo-600 hover:text-indigo-900"
           >
             Realizar Pagamento
@@ -213,7 +255,7 @@ const PlanList = ({ plans, loading, error }) => {
       case 'PAYMENT_APPROVED':
         return (
           <Link
-            to={`/view-plan/${plan.planId}`}
+            to={viewPath}
             className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
           >
             Iniciar Geração
@@ -231,7 +273,7 @@ const PlanList = ({ plans, loading, error }) => {
             <div className="relative">
               <div className="flex space-x-2">
                 <Link
-                  to={`/view-plan/${plan.planId}`}
+                  to={viewPath}
                   className="text-sm text-indigo-600 hover:text-indigo-900"
                 >
                   Ver Plano
@@ -239,7 +281,7 @@ const PlanList = ({ plans, loading, error }) => {
                 <div className="flex space-x-2">
                   {/* {plan.excelFilePath && (
                     <button
-                      onClick={() => handleDownloadPlan(plan.planId)}
+                      onClick={() => handleDownloadPlan(plan.planId, planType)}
                       className="text-sm text-green-600 hover:text-green-900"
                     >
                       Excel
@@ -247,7 +289,7 @@ const PlanList = ({ plans, loading, error }) => {
                   )} */}
                   {plan.pdfFilePath && (
                     <button
-                      onClick={() => handleDownloadPlanPdf(plan.planId)}
+                      onClick={() => handleDownloadPlanPdf(plan.planId, planType)}
                       className="text-sm text-red-600 hover:text-red-900"
                     >
                       PDF
@@ -284,7 +326,7 @@ const PlanList = ({ plans, loading, error }) => {
       case 'FAILED':
         return (
           <Link
-            to={`/view-plan/${plan.planId}`}
+            to={viewPath}
             className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700"
           >
             Tentar Novamente
@@ -293,7 +335,7 @@ const PlanList = ({ plans, loading, error }) => {
       default:
         return (
           <Link
-            to={`/view-plan/${plan.planId}`}
+            to={viewPath}
             className="text-sm text-indigo-600 hover:text-indigo-900"
           >
             Ver Detalhes
@@ -309,9 +351,12 @@ const PlanList = ({ plans, loading, error }) => {
           <li key={plan.planId} className={`px-6 py-4 ${(plan.status === 'QUEUED' || plan.status === 'GENERATING') ? 'bg-indigo-50' : ''}`}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  Plano para {plan.athleteName}
-                </h3>
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Plano para {plan.athleteName}
+                  </h3>
+                  {renderTypeBadge(plan.planType)}
+                </div>
                 <div className="mt-2 flex items-center text-sm text-gray-500">
                   <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />

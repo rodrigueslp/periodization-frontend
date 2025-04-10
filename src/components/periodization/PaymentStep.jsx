@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { periodizationService } from '../../services/periodization';
+import { strengthTrainingService } from '../../services/strengthTraining';
 import { paymentService } from '../../services/payment';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,10 +44,15 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           throw new Error('ID do plano não encontrado');
         }
         
+        // Determinar descrição com base no tipo de plano
+        const description = formData.planType === 'STRENGTH' 
+          ? "Plano de Treino de Musculação" 
+          : "Plano de Periodização CrossFit";
+        
         // Chamada para o backend para criar o pagamento
         const response = await paymentService.createPayment({
           planId: formData.planId,
-          description: "Plano de Periodização CrossFit",
+          description: description,
           amount: 9.90
         });
         
@@ -95,7 +101,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [formData.planId]);
+  }, [formData.planId, formData.planType]);
   
   // Formatar o timer para MM:SS
   const formatTime = (seconds) => {
@@ -148,8 +154,12 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   
   const handleContinue = async () => {
     try {
-      // Enviar solicitação para gerar plano assincronamente
-      await periodizationService.generateApprovedPlan(formData.planId);
+      // Enviar solicitação para gerar plano assincronamente baseado no tipo de plano
+      if (formData.planType === 'STRENGTH') {
+        await strengthTrainingService.generateApprovedPlan(formData.planId);
+      } else {
+        await periodizationService.generateApprovedPlan(formData.planId);
+      }
       
       // Redirecionar para a página de listagem de planos
       navigate('/view-plans', { 
@@ -172,7 +182,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         
         <div className="mb-6 text-center">
           <p className="text-sm text-gray-600 mb-2">
-            Para gerar seu plano de periodização, realize o pagamento de:
+            Para gerar seu plano de {formData.planType === 'STRENGTH' ? 'musculação' : 'periodização'}, realize o pagamento de:
           </p>
           <div className="text-3xl font-bold text-indigo-600 mb-4">R$ 9,90</div>
         </div>
@@ -318,7 +328,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
               onClick={handleContinue}
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
             >
-              Gerar minha periodização
+              Gerar meu plano {formData.planType === 'STRENGTH' ? 'de musculação' : 'de CrossFit'}
             </button>
           </div>
         )}
