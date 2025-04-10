@@ -5,12 +5,15 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 // Páginas
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import CreatePlanPage from './pages/CreatePlanPage';
+import PlanSelectionPage from './pages/PlanSelectionPage';
+import CreateCrossFitPlanPage from './pages/CreateCrossFitPlanPage';
+import CreateStrengthPlanPage from './pages/CreateStrengthPlanPage';
 import ViewPlanPage from './pages/ViewPlanPage';
 import PlansListPage from './pages/PlansListPage';
 import PaymentRedirect from './components/payment/PaymentRedirect';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ViewStrengthPlanPage from './pages/ViewStrengthPlanPage';
 
 // Páginas administrativas
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
@@ -122,7 +125,25 @@ function App() {
             path="/create-plan" 
             element={
               <PrivateRoute>
-                <CreatePlanPage />
+                <PlanSelectionPage />
+              </PrivateRoute>
+            } 
+          />
+          
+          <Route 
+            path="/create-crossfit-plan" 
+            element={
+              <PrivateRoute>
+                <CreateCrossFitPlanPage />
+              </PrivateRoute>
+            } 
+          />
+          
+          <Route 
+            path="/create-strength-plan" 
+            element={
+              <PrivateRoute>
+                <CreateStrengthPlanPage />
               </PrivateRoute>
             } 
           />
@@ -132,6 +153,15 @@ function App() {
             element={
               <PrivateRoute>
                 <ViewPlanPage />
+              </PrivateRoute>
+            } 
+          />
+
+          <Route 
+            path="/view-strength-plan/:planId" 
+            element={
+              <PrivateRoute>
+                <ViewStrengthPlanPage />
               </PrivateRoute>
             } 
           />
@@ -174,7 +204,7 @@ function App() {
             } 
           />
 
-          {/* Novas rotas administrativas */}
+          {/* Rotas administrativas */}
           <Route 
             path="/admin/payments" 
             element={

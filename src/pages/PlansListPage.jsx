@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import PlanList from '../components/training/PlanList';
 import { periodizationService } from '../services/periodization';
+import { strengthTrainingService } from '../services/strengthTraining';
 
 const PlansListPage = () => {
   const [plans, setPlans] = useState([]);
@@ -10,6 +11,7 @@ const PlansListPage = () => {
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Implementar atualização automática da lista
   useEffect(() => {
@@ -23,11 +25,33 @@ const PlansListPage = () => {
     // Função para buscar planos
     const fetchPlans = async () => {
       try {
-        const data = await periodizationService.getAllPlans();
-        setPlans(data);
+        // Buscar ambos os tipos de planos
+        const [crossfitPlans, strengthPlans] = await Promise.all([
+          periodizationService.getAllPlans(),
+          strengthTrainingService.getAllPlans()
+        ]);
+
+        // Marcar cada plano com seu tipo
+        const markedCrossfitPlans = crossfitPlans.map(plan => ({
+          ...plan,
+          planType: 'CROSSFIT'
+        }));
+
+        const markedStrengthPlans = strengthPlans.map(plan => ({
+          ...plan,
+          planType: 'STRENGTH'
+        }));
+
+        // Combinar os dois arrays
+        const allPlans = [...markedCrossfitPlans, ...markedStrengthPlans];
+        
+        // Ordenar por data de criação (mais recentes primeiro)
+        allPlans.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        setPlans(allPlans);
       } catch (err) {
-        console.error('Erro ao buscar periodizações:', err);
-        setError(err.message || 'Não foi possível carregar as periodizações. Por favor, tente novamente.');
+        console.error('Erro ao buscar planos:', err);
+        setError(err.message || 'Não foi possível carregar os planos. Por favor, tente novamente.');
       } finally {
         setLoading(false);
       }
@@ -37,7 +61,6 @@ const PlansListPage = () => {
     fetchPlans();
 
     // Configurar intervalo para atualizar a lista a cada 30 segundos
-    // Isso permitirá ver atualizações de status sem precisar recarregar a página
     const interval = setInterval(fetchPlans, 30000);
 
     // Limpar intervalo quando o componente for desmontado
@@ -47,6 +70,15 @@ const PlansListPage = () => {
   // Fechar notificação
   const closeNotification = () => {
     setNotification(null);
+  };
+
+  // Função para navegar para a página correta com base no tipo de plano
+  const handlePlanClick = (plan) => {
+    if (plan.planType === 'STRENGTH') {
+      navigate(`/strength-plan/${plan.planId}`);
+    } else {
+      navigate(`/plan/${plan.planId}`);
+    }
   };
 
   return (
@@ -77,16 +109,16 @@ const PlansListPage = () => {
         )}
 
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Minhas Periodizações</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Meus Planos</h1>
           <p className="mt-1 text-sm text-gray-600">
-            Visualize todas as suas periodizações de treino
+            Visualize todos os seus planos de treinamento
           </p>
           <p className="text-xs text-gray-500 mt-2">
             A lista é atualizada automaticamente. Os planos em geração podem levar alguns minutos para ficarem prontos.
           </p>
         </div>
 
-        <PlanList plans={plans} loading={loading} error={error} />
+        <PlanList plans={plans} loading={loading} error={error} onPlanClick={handlePlanClick} />
       </div>
     </Layout>
   );
