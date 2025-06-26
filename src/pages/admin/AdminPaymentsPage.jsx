@@ -22,6 +22,9 @@ const AdminPaymentsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
+  // IDs dos usuários que devem ser ocultados (hardcoded para teste)
+  const HIDDEN_USER_IDS = [1, 2, 3, 5];
+
   useEffect(() => {
     const checkAdminAccess = () => {
       const userData = authService.getUserData();
@@ -38,7 +41,14 @@ const AdminPaymentsPage = () => {
     try {
       setLoading(true);
       const response = await paymentService.getAllPayments();
-      setPayments(response);
+      
+      // Filtrar pagamentos para ocultar usuários específicos
+      const filteredPayments = response.filter(payment => {
+        // Verificar se o payment tem userId e se não está na lista de IDs ocultos
+        return payment.userId && !HIDDEN_USER_IDS.includes(payment.userId);
+      });
+      
+      setPayments(filteredPayments);
       setError(null);
     } catch (err) {
       setError('Erro ao carregar os pagamentos. Por favor, tente novamente.');
@@ -207,6 +217,15 @@ const AdminPaymentsPage = () => {
         <p className="mt-1 text-sm text-gray-600">
           Gerencie e visualize todos os pagamentos realizados na plataforma
         </p>
+        {/* Indicador visual para o filtro aplicado */}
+        <div className="mt-2">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+            </svg>
+            Ocultando usuários de teste (IDs: 1, 2, 3, 5)
+          </span>
+        </div>
       </div>
       
       {error && (
@@ -367,7 +386,7 @@ const AdminPaymentsPage = () => {
             Pagamentos
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Exibindo {filteredPayments.length} pagamentos
+            Exibindo {filteredPayments.length} pagamentos (usuários de teste ocultos)
           </p>
         </div>
         
@@ -412,6 +431,8 @@ const AdminPaymentsPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <div className="font-medium text-gray-900">{payment.userName || 'N/A'}</div>
                           <div className="text-xs">{payment.userEmail || 'N/A'}</div>
+                          {/* Mostrar userId para debug se necessário */}
+                          <div className="text-xs text-gray-400">ID: {payment.userId}</div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
                           <div className="max-w-xs truncate">
