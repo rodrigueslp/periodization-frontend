@@ -23,7 +23,7 @@ const AdminPaymentsPage = () => {
   const [itemsPerPage] = useState(10);
 
   // IDs dos usuários que devem ser ocultados (hardcoded para teste)
-  const HIDDEN_USER_IDS = [1, 2, 3, 5];
+  const HIDDEN_USER_IDS = ['ti.luizpaulo@gmail.com', 'lprodrigs@gmail.com', 'wg.o.costa@gmail.com', 'brenda.simionato@mercadolivre.com', 'brendaevellyn97@gmail.com'];
 
   useEffect(() => {
     const checkAdminAccess = () => {
@@ -45,7 +45,7 @@ const AdminPaymentsPage = () => {
       // Filtrar pagamentos para ocultar usuários específicos
       const filteredPayments = response.filter(payment => {
         // Verificar se o payment tem userId e se não está na lista de IDs ocultos
-        return payment.userId && !HIDDEN_USER_IDS.includes(payment.userId);
+        return payment.userEmail && !HIDDEN_USER_IDS.includes(payment.userEmail);
       });
       
       setPayments(filteredPayments);
