@@ -25,7 +25,7 @@ const CreateStrengthPlanPage = () => {
           experiencia: formData.experiencia,
           objetivo: formData.objetivo,
           objetivoDetalhado: formData.objetivoDetalhado,
-          disponibilidade: formData.disponibilidade,
+          disponibilidade: parseInt(formData.disponibilidade),
           lesoes: formData.lesoes,
           historico: formData.historico,
           periodoTreino: formData.periodoTreino,

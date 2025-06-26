@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { periodizationService } from '../../services/periodization';
 import { strengthTrainingService } from '../../services/strengthTraining';
 import { paymentService } from '../../services/payment';
@@ -12,6 +12,10 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [canSimulatePayment, setCanSimulatePayment] = useState(false);
+  
+  // Refs para controlar se as chamadas já foram feitas
+  const paymentInitialized = useRef(false);
+  const simulationChecked = useRef(false);
 
   const simulatePaymentApproval = async () => {
     if (!externalReference) {
@@ -34,8 +38,13 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   };
   
   useEffect(() => {
-    // Gerar pagamento ao carregar o componente
-    const generatePayment = async () => {
+    const initializePayment = async () => {
+      // Evitar chamadas duplicadas
+      if (paymentInitialized.current) {
+        return;
+      }
+      paymentInitialized.current = true;
+
       try {
         setPaymentStatus('processing');
         
@@ -49,15 +58,24 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           ? "Plano de Treino de Musculação" 
           : "Plano de Periodização CrossFit";
         
-        // Chamada para o backend para criar o pagamento
-        const response = await paymentService.createPayment({
-          planId: formData.planId,
-          description: description,
-          amount: 9.90
-        });
+        // Fazer ambas as chamadas em paralelo para otimizar
+        const [paymentResponse, simulationResponse] = await Promise.all([
+          paymentService.createPayment({
+            planId: formData.planId,
+            description: description,
+            amount: 9.90
+          }),
+          !simulationChecked.current ? paymentService.canSimulatePayment() : Promise.resolve({ canSimulate: canSimulatePayment })
+        ]);
         
-        setPaymentData(response);
-        setExternalReference(response.externalReference);
+        // Marcar que a verificação de simulação já foi feita
+        if (!simulationChecked.current) {
+          simulationChecked.current = true;
+          setCanSimulatePayment(simulationResponse.canSimulate);
+        }
+        
+        setPaymentData(paymentResponse);
+        setExternalReference(paymentResponse.externalReference);
         setPaymentStatus('pending');
         
         // Iniciar timer para expiração
@@ -70,23 +88,20 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         console.error('Erro ao gerar pagamento:', error);
         setError('Não foi possível gerar o pagamento. Por favor, tente novamente.');
         setPaymentStatus('failed');
+        // Reset do ref em caso de erro para permitir retry
+        paymentInitialized.current = false;
       }
     };
 
-    const checkSimulationPermission = async () => {
-      try {
-        const response = await paymentService.canSimulatePayment();
-        setCanSimulatePayment(response.canSimulate);
-      } catch (error) {
-        console.error('Erro ao verificar permissão de simulação:', error);
-        setCanSimulatePayment(false);
-      }
-    };
-    
-    generatePayment();
-    checkSimulationPermission();
-    
-    // Iniciar timer
+    initializePayment();
+  }, [formData.planId, formData.planType]); // Dependências específicas
+
+  useEffect(() => {
+    // Timer effect separado e mais limpo
+    if (paymentStatus !== 'pending') {
+      return;
+    }
+
     const interval = setInterval(() => {
       setTimer((prevTimer) => {
         if (prevTimer <= 1) {
@@ -101,7 +116,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [formData.planId, formData.planType]);
+  }, [paymentStatus]); // Só roda quando o status muda para pending
   
   // Formatar o timer para MM:SS
   const formatTime = (seconds) => {
@@ -173,6 +188,15 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       setError('Ocorreu um erro ao iniciar a geração do plano. Você pode tentar novamente posteriormente.');
       setPaymentStatus('failed');
     }
+  };
+
+  // Função para retry em caso de erro
+  const handleRetry = () => {
+    paymentInitialized.current = false;
+    simulationChecked.current = false;
+    setError('');
+    setPaymentStatus('pending');
+    // O useEffect será triggered novamente
   };
 
   return (
@@ -253,7 +277,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             </div>
             
             {/* Bloco de simulação de pagamento */}
-            {canSimulatePayment  && (
+            {canSimulatePayment && (
               <div className="rounded-md bg-yellow-50 p-4 mb-6">
                 <div className="flex">
                   <div className="flex-shrink-0">
@@ -345,7 +369,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             <p className="text-sm text-gray-600 mb-4">{error || 'Não foi possível confirmar seu pagamento. Por favor, tente novamente.'}</p>
             <button
               type="button"
-              onClick={() => window.location.reload()}
+              onClick={handleRetry}
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
             >
               Tentar novamente

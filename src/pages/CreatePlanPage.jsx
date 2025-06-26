@@ -19,9 +19,9 @@ const CreatePlanPage = () => {
       const requestData = {
         athleteData: {
           nome: formData.nome,
-          idade: formData.idade,
-          peso: formData.peso,
-          altura: formData.altura,
+          idade: parseInt(formData.idade),
+          peso: parseFloat(formData.peso),
+          altura: parseFloat(formData.altura),
           experiencia: formData.experiencia,
           objetivo: formData.objetivo,
           objetivoDetalhado: formData.objetivoDetalhado,
