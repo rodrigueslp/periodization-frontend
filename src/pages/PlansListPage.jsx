@@ -84,6 +84,51 @@ const PlansListPage = () => {
 
     fetchPlans();
   }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const stillGenerating = allPlans.some(plan =>
+        ['QUEUED', 'GENERATING'].includes(plan.status)
+      );
+      if (stillGenerating) {
+        // reexecuta a mesma lógica do fetchPlans
+        (async () => {
+          try {
+            const [crossfitPlans, strengthPlans, runningPlans] = await Promise.all([
+              periodizationService.getAllPlans().catch(() => []),
+              strengthTrainingService.getAllPlans().catch(() => []),
+              runningTrainingService.getAllPlans().catch(() => [])
+            ]);
+
+            const markedCrossfitPlans = crossfitPlans.map(plan => ({
+              ...plan,
+              planType: 'CROSSFIT'
+            }));
+
+            const markedStrengthPlans = strengthPlans.map(plan => ({
+              ...plan,
+              planType: 'STRENGTH'
+            }));
+
+            const markedRunningPlans = runningPlans.map(plan => ({
+              ...plan,
+              planType: 'RUNNING'
+            }));
+
+            const combinedPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans]
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            setAllPlans(combinedPlans);
+            setFilteredPlans(combinedPlans);
+          } catch (err) {
+            console.error('Erro ao atualizar planos com polling:', err);
+          }
+        })();
+      }
+    }, 6000); // a cada 6 segundos
+
+    return () => clearInterval(interval);
+  }, [allPlans]);
+
 
   // Aplicar filtros quando filterType ou filterStatus mudarem
   useEffect(() => {
