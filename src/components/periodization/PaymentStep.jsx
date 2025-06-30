@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { periodizationService } from '../../services/periodization';
 import { strengthTrainingService } from '../../services/strengthTraining';
+import { runningTrainingService } from '../../services/runningTraining';
 import { paymentService } from '../../services/payment';
 import { useNavigate } from 'react-router-dom';
 
@@ -172,6 +173,8 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       // Enviar solicitação para gerar plano assincronamente baseado no tipo de plano
       if (formData.planType === 'STRENGTH') {
         await strengthTrainingService.generateApprovedPlan(formData.planId);
+      } else if (formData.planType === 'RUNNING') {
+        await runningTrainingService.generateApprovedPlan(formData.planId);
       } else {
         await periodizationService.generateApprovedPlan(formData.planId);
       }
@@ -352,7 +355,11 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
               onClick={handleContinue}
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
             >
-              Gerar meu plano {formData.planType === 'STRENGTH' ? 'de musculação' : 'de CrossFit'}
+              Gerar meu plano {
+              formData.planType === 'STRENGTH' ? 'de musculação' :
+              formData.planType === 'RUNNING' ? 'de corrida' :
+              'de CrossFit'
+            }
             </button>
           </div>
         )}
