@@ -14,6 +14,8 @@ import PaymentRedirect from './components/payment/PaymentRedirect';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ViewStrengthPlanPage from './pages/ViewStrengthPlanPage';
+import CreateRunningPlanPage from './pages/CreateRunningPlanPage';
+import ViewRunningPlanPage from './pages/ViewRunningPlanPage';
 
 // Páginas administrativas
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
@@ -147,6 +149,15 @@ function App() {
               </PrivateRoute>
             } 
           />
+
+          <Route 
+            path="/create-running-plan" 
+            element={
+              <PrivateRoute>
+                <CreateRunningPlanPage />
+              </PrivateRoute>
+            }
+          />
           
           <Route 
             path="/view-plan/:planId" 
@@ -162,6 +173,15 @@ function App() {
             element={
               <PrivateRoute>
                 <ViewStrengthPlanPage />
+              </PrivateRoute>
+            } 
+          />
+
+          <Route 
+            path="/view-running-plan/:planId" 
+            element={
+              <PrivateRoute>
+                <ViewRunningPlanPage />
               </PrivateRoute>
             } 
           />

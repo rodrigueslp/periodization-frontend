@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { PersonSimpleRun, Barbell, PersonSimple } from "phosphor-react";
 
 const PlanTypeSelector = () => {
   return (
@@ -13,9 +14,9 @@ const PlanTypeSelector = () => {
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-indigo-100 rounded-md p-3">
-                  <svg className="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+                  <div className="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                    <PersonSimple size={24} color="#6366F1" weight="duotone" />
+                  </div>
                 </div>
                 <div className="ml-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">CrossFit</h3>
@@ -39,9 +40,9 @@ const PlanTypeSelector = () => {
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
-                  <svg className="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
+                  <div className="flex-shrink-0 bg-green-100 rounded-md p-3">
+                    <Barbell size={24} color="#22C55E" weight="duotone" />
+                  </div>
                 </div>
                 <div className="ml-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Musculação</h3>
@@ -60,6 +61,33 @@ const PlanTypeSelector = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white overflow-hidden shadow rounded-lg border-2 border-orange-500 hover:border-orange-600 transition-colors">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 bg-orange-100 rounded-md p-3">
+                  <div className="flex-shrink-0 bg-orange-100 rounded-md p-3">
+                    <PersonSimpleRun size={24} color="#EA580C" />
+                  </div>
+                </div>
+                <div className="ml-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Corrida</h3>
+                  <div className="mt-2 max-w-xl text-sm text-gray-500">
+                    <p>Plano de corrida com progressão personalizada por nível, objetivo e disponibilidade.</p>
+                  </div>
+                  <div className="mt-3">
+                    <Link
+                      to="/create-running-plan"
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700"
+                    >
+                      Criar plano de Corrida
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
