@@ -6,17 +6,20 @@ import { paymentService } from '../../services/payment';
 import { useNavigate } from 'react-router-dom';
 
 const PaymentStep = ({ formData, prevStep, onSubmit }) => {
-  const [paymentStatus, setPaymentStatus] = useState('pending'); // pending, processing, success, failed
+  const [paymentStatus, setPaymentStatus] = useState('pending');
   const [paymentData, setPaymentData] = useState(null);
   const [externalReference, setExternalReference] = useState('');
-  const [timer, setTimer] = useState(900); // 15 minutos em segundos
+  const [timer, setTimer] = useState(900); // 15 minutos
   const [error, setError] = useState('');
+  const [autoCheckCount, setAutoCheckCount] = useState(0);
   const navigate = useNavigate();
   const [canSimulatePayment, setCanSimulatePayment] = useState(false);
   
-  // Refs para controlar se as chamadas já foram feitas
+  // Refs para controlar chamadas
   const paymentInitialized = useRef(false);
   const simulationChecked = useRef(false);
+  const autoCheckInterval = useRef(null);
+  const timerInterval = useRef(null);
 
   const simulatePaymentApproval = async () => {
     if (!externalReference) {
@@ -26,10 +29,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
     
     try {
       setPaymentStatus('processing');
-      
-      // Usando o serviço de pagamento para simular a aprovação
       await paymentService.simulatePaymentApproval(externalReference);
-      
       setPaymentStatus('success');
     } catch (error) {
       console.error('Erro ao simular aprovação:', error);
@@ -37,29 +37,66 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       setError('Falha ao simular aprovação. Tente novamente.');
     }
   };
+
+  // ← VERIFICAÇÃO AUTOMÁTICA A CADA 15 SEGUNDOS
+  const autoCheckPaymentStatus = async () => {
+    if (!externalReference || paymentStatus !== 'pending') {
+      return;
+    }
+
+    try {
+      console.log(`Verificação automática ${autoCheckCount + 1} do pagamento ${externalReference}`);
+      
+      const response = await paymentService.checkPaymentStatus(externalReference);
+      
+      if (response.status === 'approved') {
+        console.log('🎉 Pagamento aprovado automaticamente!');
+        setPaymentStatus('success');
+        clearAutoCheck();
+      } else if (response.status === 'rejected' || response.status === 'cancelled') {
+        setPaymentStatus('failed');
+        setError('Pagamento foi rejeitado ou cancelado.');
+        clearAutoCheck();
+      }
+
+      setAutoCheckCount(prev => prev + 1);
+    } catch (error) {
+      console.error('Erro na verificação automática:', error);
+    }
+  };
+
+  const clearAutoCheck = () => {
+    if (autoCheckInterval.current) {
+      clearInterval(autoCheckInterval.current);
+      autoCheckInterval.current = null;
+    }
+  };
+
+  const clearTimer = () => {
+    if (timerInterval.current) {
+      clearInterval(timerInterval.current);
+      timerInterval.current = null;
+    }
+  };
   
   useEffect(() => {
     const initializePayment = async () => {
-      // Evitar chamadas duplicadas
-      if (paymentInitialized.current) {
-        return;
-      }
+      if (paymentInitialized.current) return;
       paymentInitialized.current = true;
 
       try {
         setPaymentStatus('processing');
         
-        // Verificar se temos um planId
         if (!formData.planId) {
           throw new Error('ID do plano não encontrado');
         }
         
-        // Determinar descrição com base no tipo de plano
         const description = formData.planType === 'STRENGTH' 
           ? "Plano de Treino de Musculação" 
+          : formData.planType === 'RUNNING'
+          ? "Plano de Treino de Corrida"
           : "Plano de Periodização CrossFit";
         
-        // Fazer ambas as chamadas em paralelo para otimizar
         const [paymentResponse, simulationResponse] = await Promise.all([
           paymentService.createPayment({
             planId: formData.planId,
@@ -69,7 +106,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           !simulationChecked.current ? paymentService.canSimulatePayment() : Promise.resolve({ canSimulate: canSimulatePayment })
         ]);
         
-        // Marcar que a verificação de simulação já foi feita
         if (!simulationChecked.current) {
           simulationChecked.current = true;
           setCanSimulatePayment(simulationResponse.canSimulate);
@@ -79,7 +115,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         setExternalReference(paymentResponse.externalReference);
         setPaymentStatus('pending');
         
-        // Iniciar timer para expiração
         const expirationTime = new Date();
         expirationTime.setMinutes(expirationTime.getMinutes() + 15);
         const timeRemaining = Math.floor((expirationTime.getTime() - new Date().getTime()) / 1000);
@@ -89,44 +124,65 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         console.error('Erro ao gerar pagamento:', error);
         setError('Não foi possível gerar o pagamento. Por favor, tente novamente.');
         setPaymentStatus('failed');
-        // Reset do ref em caso de erro para permitir retry
         paymentInitialized.current = false;
       }
     };
 
     initializePayment();
-  }, [formData.planId, formData.planType]); // Dependências específicas
+  }, [formData.planId, formData.planType]);
 
+  // ← EFFECT PARA VERIFICAÇÃO AUTOMÁTICA
   useEffect(() => {
-    // Timer effect separado e mais limpo
-    if (paymentStatus !== 'pending') {
-      return;
+    if (paymentStatus === 'pending' && externalReference) {
+      // Iniciar verificação automática após 10 segundos
+      const startDelay = setTimeout(() => {
+        autoCheckInterval.current = setInterval(autoCheckPaymentStatus, 15000); // A cada 15 segundos
+      }, 10000);
+
+      return () => {
+        clearTimeout(startDelay);
+        clearAutoCheck();
+      };
+    } else {
+      clearAutoCheck();
+    }
+  }, [paymentStatus, externalReference]);
+
+  // Effect para o timer
+  useEffect(() => {
+    if (paymentStatus === 'pending') {
+      timerInterval.current = setInterval(() => {
+        setTimer((prevTimer) => {
+          if (prevTimer <= 1) {
+            clearTimer();
+            clearAutoCheck();
+            return 0;
+          }
+          return prevTimer - 1;
+        });
+      }, 1000);
+    } else {
+      clearTimer();
     }
 
-    const interval = setInterval(() => {
-      setTimer((prevTimer) => {
-        if (prevTimer <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prevTimer - 1;
-      });
-    }, 1000);
-    
-    // Limpar intervalo no unmount
+    return () => clearTimer();
+  }, [paymentStatus]);
+
+  // Cleanup no unmount
+  useEffect(() => {
     return () => {
-      clearInterval(interval);
+      clearAutoCheck();
+      clearTimer();
     };
-  }, [paymentStatus]); // Só roda quando o status muda para pending
+  }, []);
   
-  // Formatar o timer para MM:SS
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
   
-  // Verificar status do pagamento
+  // Verificação manual
   const checkPaymentStatus = async () => {
     if (!externalReference) {
       setError('Referência de pagamento não encontrada.');
@@ -140,21 +196,23 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       
       if (response.status === 'approved') {
         setPaymentStatus('success');
+        clearAutoCheck();
       } else if (response.status === 'pending') {
         setPaymentStatus('pending');
         setError('Pagamento ainda não foi confirmado. Aguarde alguns instantes e tente novamente.');
       } else {
         setPaymentStatus('failed');
         setError('Não foi possível confirmar o pagamento.');
+        clearAutoCheck();
       }
     } catch (error) {
       console.error('Erro ao verificar pagamento:', error);
       setPaymentStatus('failed');
       setError('Ocorreu um erro ao verificar o pagamento. Por favor, tente novamente.');
+      clearAutoCheck();
     }
   };
   
-  // Função para redirecionar para URL de pagamento (se não for PIX)
   const redirectToPayment = () => {
     if (paymentData && paymentData.paymentUrl) {
       window.open(paymentData.paymentUrl, '_blank');
@@ -170,7 +228,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
   
   const handleContinue = async () => {
     try {
-      // Enviar solicitação para gerar plano assincronamente baseado no tipo de plano
       if (formData.planType === 'STRENGTH') {
         await strengthTrainingService.generateApprovedPlan(formData.planId);
       } else if (formData.planType === 'RUNNING') {
@@ -179,7 +236,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         await periodizationService.generateApprovedPlan(formData.planId);
       }
       
-      // Redirecionar para a página de listagem de planos
       navigate('/view-plans', { 
         state: { 
           message: 'Seu plano foi enviado para geração e estará disponível em breve. Você pode verificar o status na lista de planos.' 
@@ -193,13 +249,14 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
     }
   };
 
-  // Função para retry em caso de erro
   const handleRetry = () => {
     paymentInitialized.current = false;
     simulationChecked.current = false;
     setError('');
     setPaymentStatus('pending');
-    // O useEffect será triggered novamente
+    setAutoCheckCount(0);
+    clearAutoCheck();
+    clearTimer();
   };
 
   return (
@@ -209,12 +266,16 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         
         <div className="mb-6 text-center">
           <p className="text-sm text-gray-600 mb-2">
-            Para gerar seu plano de {formData.planType === 'STRENGTH' ? 'musculação' : 'periodização'}, realize o pagamento de:
+            Para gerar seu plano de {
+              formData.planType === 'STRENGTH' ? 'musculação' : 
+              formData.planType === 'RUNNING' ? 'corrida' : 
+              'periodização'
+            }, realize o pagamento de:
           </p>
           <div className="text-3xl font-bold text-indigo-600 mb-4">R$ 9,90</div>
         </div>
         
-        {/* Pagamento ainda não confirmado */}
+        {/* Pagamento pendente */}
         {(paymentStatus === 'pending' && paymentData) && (
           <div className="bg-gray-50 p-6 rounded-lg mb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Pague com PIX</h3>
@@ -271,15 +332,20 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <div className="ml-3 flex-1 md:flex md:justify-between">
+                <div className="ml-3 flex-1">
                   <p className="text-sm text-blue-700">
                     Abra o app do seu banco, selecione PIX e escaneie o código ou cole o código de pagamento.
+                    {autoCheckCount > 0 && (
+                      <span className="block mt-1 text-xs">
+                        ✓ Verificando automaticamente o pagamento... ({autoCheckCount} verificações)
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
             </div>
             
-            {/* Bloco de simulação de pagamento */}
+            {/* Simulação de pagamento */}
             {canSimulatePayment && (
               <div className="rounded-md bg-yellow-50 p-4 mb-6">
                 <div className="flex">
@@ -309,21 +375,21 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
               <p className="text-sm text-gray-500 mb-1">
                 O código expira em: <span className="font-medium">{formatTime(timer)}</span>
               </p>
-              <p className="text-xs text-gray-500">
-                Após realizar o pagamento, clique no botão abaixo para verificar
+              <p className="text-xs text-gray-500 mb-2">
+                O pagamento será verificado automaticamente, mas você também pode verificar manualmente
               </p>
               <button
                 type="button"
                 onClick={checkPaymentStatus}
-                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                className="mt-2 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
               >
-                Verifiquei o pagamento
+                Verificar pagamento manualmente
               </button>
             </div>
           </div>
         )}
         
-        {/* Processando pagamento */}
+        {/* Processando */}
         {paymentStatus === 'processing' && (
           <div className="bg-gray-50 p-6 rounded-lg mb-6 text-center">
             <svg className="animate-spin h-10 w-10 text-indigo-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -335,7 +401,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           </div>
         )}
         
-        {/* Pagamento aprovado, pronto para gerar */}
+        {/* Sucesso */}
         {paymentStatus === 'success' && (
           <div className="bg-green-50 p-6 rounded-lg mb-6 text-center">
             <div className="rounded-full bg-green-100 h-12 w-12 flex items-center justify-center mx-auto mb-4">
@@ -364,7 +430,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
           </div>
         )}
         
-        {/* Falha no pagamento */}
+        {/* Erro */}
         {paymentStatus === 'failed' && (
           <div className="bg-red-50 p-6 rounded-lg mb-6 text-center">
             <div className="rounded-full bg-red-100 h-12 w-12 flex items-center justify-center mx-auto mb-4">
@@ -386,7 +452,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
       </div>
   
       <div className="flex justify-between">
-        {prevStep && ( // Verifica se prevStep existe antes de renderizar o botão
+        {prevStep && (
           <button
             type="button"
             onClick={prevStep}
@@ -396,7 +462,6 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             Voltar
           </button>
         )}
-        {/* Se não tivermos prevStep, podemos adicionar um link para a lista de planos */}
         {!prevStep && (
           <button
             type="button"

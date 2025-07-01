@@ -27,5 +27,9 @@ export const paymentService = {
 
   getAllPayments: async () => {
     return api.get('/api/payments/admin');
+  },
+
+  recoverPaymentInfo: async (planId) => {
+    return api.get(`/api/payments/recovery/${planId}`);
   }
 };
