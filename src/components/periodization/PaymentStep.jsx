@@ -23,7 +23,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
 
   const simulatePaymentApproval = async () => {
     if (!externalReference) {
-      setError('Não há referência de pagamento para aprovar');
+      setError('Não há referência de pagamento para aprovar!');
       return;
     }
     
