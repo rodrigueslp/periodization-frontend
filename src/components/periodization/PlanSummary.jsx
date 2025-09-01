@@ -215,19 +215,7 @@ const PlanSummary = ({ formData, updateFormData, nextStep, prevStep }) => {
             </div>
           </div>
 
-          {/* Resumo do investimento */}
-          <div className="mt-6 p-4 bg-indigo-50 border border-indigo-200 rounded-md">
-            <div className="flex justify-between items-center">
-              <div>
-                <h5 className="text-sm font-medium text-indigo-900">Plano Personalizado de CrossFit</h5>
-                <p className="text-sm text-indigo-700">{formData.planDuration || 4} semanas de treino</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-indigo-900">R$ 29,90</p>
-                <p className="text-xs text-indigo-600">Pagamento único</p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* Botões */}

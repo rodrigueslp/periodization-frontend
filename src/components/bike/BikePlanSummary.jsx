@@ -184,19 +184,7 @@ const BikePlanSummary = ({ formData, updateFormData, nextStep, prevStep }) => {
 
           </div>
 
-          {/* Resumo do investimento */}
-          <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-md">
-            <div className="flex justify-between items-center">
-              <div>
-                <h5 className="text-sm font-medium text-purple-900">Plano Personalizado de Bike</h5>
-                <p className="text-sm text-purple-700">{formData.planDuration || 4} semanas de treino</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-purple-900">R$ 29,90</p>
-                <p className="text-xs text-purple-600">Pagamento único</p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* Botões */}
