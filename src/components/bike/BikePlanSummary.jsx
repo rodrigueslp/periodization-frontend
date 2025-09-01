@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) => {
+const BikePlanSummary = ({ formData, updateFormData, nextStep, prevStep }) => {
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -31,45 +31,37 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
 
   const formatExperience = (exp) => {
     const experiences = {
-      'iniciante': 'Iniciante (0-6 meses)',
-      'intermediario': 'Intermediário (6 meses - 2 anos)',
-      'avancado': 'Avançado (2+ anos)',
-      'elite': 'Elite/Competidor'
+      'iniciante': 'Iniciante (0-1 ano)',
+      'intermediario': 'Intermediário (1-3 anos)',
+      'avancado': 'Avançado (3+ anos)',
+      'competitivo': 'Competitivo/Elite'
     };
     return experiences[exp] || exp;
   };
 
   const formatObjective = (obj) => {
     const objectives = {
-      'hipertrofia': 'Hipertrofia',
-      'forca': 'Ganho de Força',
-      'resistencia': 'Resistência Muscular',
-      'potencia': 'Potência',
-      'emagrecimento': 'Emagrecimento',
-      'definicao': 'Definição Muscular',
-      'condicionamento': 'Condicionamento Geral'
+      'condicionamento': 'Condicionamento geral',
+      'speed': 'Ciclismo de estrada/speed',
+      'mountain_bike': 'Mountain bike',
+      'triathlon': 'Triathlon',
+      'competicao': 'Competição/Performance',
+      'perda_peso': 'Perda de peso',
+      'resistencia': 'Resistência de longa distância'
     };
     return objectives[obj] || obj;
   };
 
-  const formatTrainingFocus = (focus) => {
-    const focuses = {
-      'fullBody': 'Full Body',
-      'upperLower': 'Upper/Lower',
-      'pushPullLegs': 'Push/Pull/Legs',
-      'abcde': 'Divisão por Grupos (A/B/C/D/E)'
+  const formatBikeType = (type) => {
+    const types = {
+      'speed': 'Speed/Estrada',
+      'mountain_bike': 'Mountain bike',
+      'indoor': 'Indoor/Smart trainer',
+      'gravel': 'Gravel',
+      'hibrida': 'Híbrida',
+      'urbana': 'Urbana'
     };
-    return focuses[focus] || focus;
-  };
-
-  const formatPeriodo = (periodo) => {
-    const periodos = {
-      'manha': 'Manhã',
-      'tarde': 'Tarde',
-      'noite': 'Noite',
-      'variado': 'Variado'
-    };
-    return periodos[periodo] || periodo;
+    return types[type] || type;
   };
 
   return (
@@ -78,8 +70,8 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Resumo do Plano</h2>
 
         {/* Resumo das informações */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <h4 className="text-md font-medium text-green-900 mb-4">Informações Pessoais</h4>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+          <h4 className="text-md font-medium text-purple-900 mb-4">Informações Pessoais</h4>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <span className="text-sm font-medium text-gray-700">Nome:</span>
@@ -113,54 +105,52 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
             </div>
             <div>
               <span className="text-sm font-medium text-gray-700">Dias por semana:</span>
-              <p className="text-sm text-gray-900">{formData.disponibilidade} dias</p>
+              <p className="text-sm text-gray-900">{formData.diasDisponiveis} dias</p>
             </div>
-            {formData.trainingFocus && (
+            <div>
+              <span className="text-sm font-medium text-gray-700">Volume atual:</span>
+              <p className="text-sm text-gray-900">{formData.volumeSemanalAtual} horas/semana</p>
+            </div>
+            {formData.tipoBike && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Foco do treino:</span>
-                <p className="text-sm text-gray-900">{formatTrainingFocus(formData.trainingFocus)}</p>
+                <span className="text-sm font-medium text-gray-700">Tipo de bike:</span>
+                <p className="text-sm text-gray-900">{formatBikeType(formData.tipoBike)}</p>
               </div>
             )}
-            {formData.sessionDuration && (
+            {formData.ftpAtual && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Duração por sessão:</span>
-                <p className="text-sm text-gray-900">{formData.sessionDuration} minutos</p>
+                <span className="text-sm font-medium text-gray-700">FTP:</span>
+                <p className="text-sm text-gray-900">{formData.ftpAtual}W</p>
               </div>
             )}
-            {formData.sessionsPerWeek && (
+            {formData.potenciaMediaAtual && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Sessões por semana:</span>
-                <p className="text-sm text-gray-900">{formData.sessionsPerWeek} sessões</p>
+                <span className="text-sm font-medium text-gray-700">Potência média:</span>
+                <p className="text-sm text-gray-900">{formData.potenciaMediaAtual}W</p>
               </div>
             )}
-            {formData.periodoTreino && (
+            {formData.melhorTempo40km && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Período:</span>
-                <p className="text-sm text-gray-900">{formatPeriodo(formData.periodoTreino)}</p>
+                <span className="text-sm font-medium text-gray-700">Melhor 40km:</span>
+                <p className="text-sm text-gray-900">{formData.melhorTempo40km}</p>
               </div>
             )}
-            {formData.equipmentAvailable && (
-              <div className="sm:col-span-2">
-                <span className="text-sm font-medium text-gray-700">Equipamentos:</span>
-                <p className="text-sm text-gray-900">{formData.equipmentAvailable}</p>
+            {formData.melhorTempo100km && (
+              <div>
+                <span className="text-sm font-medium text-gray-700">Melhor 100km:</span>
+                <p className="text-sm text-gray-900">{formData.melhorTempo100km}</p>
               </div>
             )}
-            {formData.objetivoDetalhado && (
-              <div className="sm:col-span-2">
-                <span className="text-sm font-medium text-gray-700">Objetivo detalhado:</span>
-                <p className="text-sm text-gray-900">{formData.objetivoDetalhado}</p>
+            {formData.tempoObjetivo && (
+              <div>
+                <span className="text-sm font-medium text-gray-700">Objetivo:</span>
+                <p className="text-sm text-gray-900">{formData.tempoObjetivo}</p>
               </div>
             )}
-            {formData.lesoes && (
-              <div className="sm:col-span-2">
-                <span className="text-sm font-medium text-gray-700">Lesões/Limitações:</span>
-                <p className="text-sm text-gray-900">{formData.lesoes}</p>
-              </div>
-            )}
-            {formData.historico && (
-              <div className="sm:col-span-2">
-                <span className="text-sm font-medium text-gray-700">Histórico:</span>
-                <p className="text-sm text-gray-900">{formData.historico}</p>
+            {formData.dataProva && (
+              <div>
+                <span className="text-sm font-medium text-gray-700">Data da prova:</span>
+                <p className="text-sm text-gray-900">{formData.dataProva}</p>
               </div>
             )}
           </div>
@@ -181,7 +171,7 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
                 id="planDuration"
                 value={formData.planDuration || ''}
                 onChange={(e) => handleInputChange('planDuration', parseInt(e.target.value))}
-                className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                   errors.planDuration ? 'border-red-300' : 'border-gray-300'
                 }`}
                 placeholder="Ex: 8"
@@ -190,18 +180,20 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
               />
               {errors.planDuration && <p className="mt-1 text-sm text-red-600">{errors.planDuration}</p>}
             </div>
+
+
           </div>
 
           {/* Resumo do investimento */}
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
+          <div className="mt-6 p-4 bg-purple-50 border border-purple-200 rounded-md">
             <div className="flex justify-between items-center">
               <div>
-                <h5 className="text-sm font-medium text-green-900">Plano Personalizado de Musculação</h5>
-                <p className="text-sm text-green-700">{formData.planDuration || 4} semanas de treino</p>
+                <h5 className="text-sm font-medium text-purple-900">Plano Personalizado de Bike</h5>
+                <p className="text-sm text-purple-700">{formData.planDuration || 4} semanas de treino</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-green-900">R$ 29,90</p>
-                <p className="text-xs text-green-600">Pagamento único</p>
+                <p className="text-lg font-bold text-purple-900">R$ 29,90</p>
+                <p className="text-xs text-purple-600">Pagamento único</p>
               </div>
             </div>
           </div>
@@ -218,7 +210,7 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
           </button>
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
           >
             Prosseguir para pagamento
           </button>
@@ -228,4 +220,4 @@ const StrengthPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =
   );
 };
 
-export default StrengthPlanSummary;
+export default BikePlanSummary;

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { periodizationService } from '../../services/periodization';
 import { strengthTrainingService } from '../../services/strengthTraining';
 import { runningTrainingService } from '../../services/runningTraining';
+import { bikeTrainingService } from '../../services/bikeTraining';
 import { paymentService } from '../../services/payment';
 import { useNavigate } from 'react-router-dom';
 
@@ -232,6 +233,8 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
         await strengthTrainingService.generateApprovedPlan(formData.planId);
       } else if (formData.planType === 'RUNNING') {
         await runningTrainingService.generateApprovedPlan(formData.planId);
+      } else if (formData.planType === 'BIKE') {
+        await bikeTrainingService.generateApprovedPlan(formData.planId);
       } else {
         await periodizationService.generateApprovedPlan(formData.planId);
       }
@@ -261,7 +264,7 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white shadow px-6 py-6 rounded-lg">
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Pagamento</h2>
         
         <div className="mb-6 text-center">
@@ -449,29 +452,30 @@ const PaymentStep = ({ formData, prevStep, onSubmit }) => {
             </button>
           </div>
         )}
-      </div>
-  
-      <div className="flex justify-between">
-        {prevStep && (
-          <button
-            type="button"
-            onClick={prevStep}
-            disabled={paymentStatus === 'processing'}
-            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            Voltar
-          </button>
-        )}
-        {!prevStep && (
-          <button
-            type="button"
-            onClick={() => navigate('/view-plans')}
-            disabled={paymentStatus === 'processing'}
-            className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            Voltar para Meus Planos
-          </button>
-        )}
+
+        {/* Botões */}
+        <div className="flex justify-between pt-6">
+          {prevStep && (
+            <button
+              type="button"
+              onClick={prevStep}
+              disabled={paymentStatus === 'processing'}
+              className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            >
+              Voltar
+            </button>
+          )}
+          {!prevStep && (
+            <button
+              type="button"
+              onClick={() => navigate('/view-plans')}
+              disabled={paymentStatus === 'processing'}
+              className="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+            >
+              Voltar para Meus Planos
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

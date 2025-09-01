@@ -1,108 +1,168 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const PersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
-  const handleChange = (e) => {
-    updateFormData({ [e.target.name]: e.target.value });
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.nome?.trim()) {
+      newErrors.nome = 'Nome é obrigatório';
+    }
+
+    if (!formData.idade || formData.idade < 14 || formData.idade > 80) {
+      newErrors.idade = 'Idade deve estar entre 14 e 80 anos';
+    }
+
+    if (!formData.peso || formData.peso < 30 || formData.peso > 200) {
+      newErrors.peso = 'Peso deve estar entre 30 e 200 kg';
+    }
+
+    if (!formData.altura || formData.altura < 100 || formData.altura > 220) {
+      newErrors.altura = 'Altura deve estar entre 100 e 220 cm';
+    }
+
+    if (!formData.experiencia) {
+      newErrors.experiencia = 'Nível de experiência é obrigatório';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    nextStep();
+    if (validateForm()) {
+      nextStep();
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    updateFormData({ [field]: value });
+    // Limpar erro quando o campo for corrigido
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: null });
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white shadow px-6 py-6 rounded-lg">
+      <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Informações Pessoais</h2>
+        </div>
 
         <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          {/* Nome */}
           <div className="sm:col-span-6">
             <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
-              Nome Completo *
+              Nome completo *
             </label>
-            <div className="mt-1">
-              <input
-                type="text"
-                name="nome"
-                id="nome"
-                required
-                value={formData.nome}
-                onChange={handleChange}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
+            <input
+              type="text"
+              id="nome"
+              value={formData.nome || ''}
+              onChange={(e) => handleInputChange('nome', e.target.value)}
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+                errors.nome ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="Digite seu nome completo"
+            />
+            {errors.nome && <p className="mt-1 text-sm text-red-600">{errors.nome}</p>}
           </div>
 
-          <div className="sm:col-span-2">
+          {/* Idade */}
+          <div className="sm:col-span-3">
             <label htmlFor="idade" className="block text-sm font-medium text-gray-700">
               Idade *
             </label>
-            <div className="mt-1">
-              <input
-                type="number"
-                name="idade"
-                id="idade"
-                min="14"
-                max="80"
-                required
-                value={formData.idade}
-                onChange={handleChange}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
+            <input
+              type="number"
+              id="idade"
+              value={formData.idade || ''}
+              onChange={(e) => handleInputChange('idade', e.target.value)}
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+                errors.idade ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="Ex: 30"
+              min="14"
+              max="80"
+            />
+            {errors.idade && <p className="mt-1 text-sm text-red-600">{errors.idade}</p>}
           </div>
 
-          <div className="sm:col-span-2">
+          {/* Peso */}
+          <div className="sm:col-span-3">
             <label htmlFor="peso" className="block text-sm font-medium text-gray-700">
               Peso (kg) *
             </label>
-            <div className="mt-1">
-              <input
-                type="number"
-                step="0.1"
-                name="peso"
-                id="peso"
-                min="30"
-                max="200"
-                required
-                value={formData.peso}
-                onChange={handleChange}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
+            <input
+              type="number"
+              step="0.1"
+              id="peso"
+              value={formData.peso || ''}
+              onChange={(e) => handleInputChange('peso', e.target.value)}
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+                errors.peso ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="Ex: 70.5"
+              min="30"
+              max="200"
+            />
+            {errors.peso && <p className="mt-1 text-sm text-red-600">{errors.peso}</p>}
           </div>
-          <div className="sm:col-span-2">
+
+          {/* Altura */}
+          <div className="sm:col-span-3">
             <label htmlFor="altura" className="block text-sm font-medium text-gray-700">
-              Altura (m) *
+              Altura (cm) *
             </label>
-            <div className="mt-1">
-              <input
-                type="number"
-                name="altura"
-                id="altura"
-                min="1.00"
-                max="2.50"
-                step="0.01"
-                placeholder="Ex: 1.75"
-                required
-                value={formData.altura}
-                onChange={handleChange}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              />
-            </div>
-            <p className="mt-1 text-xs text-gray-500">Utilize ponto (ex: 1.75)</p>
+            <input
+              type="number"
+              id="altura"
+              value={formData.altura || ''}
+              onChange={(e) => handleInputChange('altura', e.target.value)}
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+                errors.altura ? 'border-red-300' : 'border-gray-300'
+              }`}
+              placeholder="Ex: 175"
+              min="100"
+              max="220"
+            />
+            {errors.altura && <p className="mt-1 text-sm text-red-600">{errors.altura}</p>}
+          </div>
+
+          {/* Nível de Experiência */}
+          <div className="sm:col-span-6">
+            <label htmlFor="experiencia" className="block text-sm font-medium text-gray-700">
+              Nível de experiência no CrossFit *
+            </label>
+            <select
+              id="experiencia"
+              value={formData.experiencia || ''}
+              onChange={(e) => handleInputChange('experiencia', e.target.value)}
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+                errors.experiencia ? 'border-red-300' : 'border-gray-300'
+              }`}
+            >
+              <option value="">Selecione seu nível</option>
+              <option value="iniciante">Iniciante (0-1 ano)</option>
+              <option value="intermediario">Intermediário (1-3 anos)</option>
+              <option value="avancado">Avançado (3+ anos)</option>
+              <option value="competitivo">Competitivo/Elite</option>
+            </select>
+            {errors.experiencia && <p className="mt-1 text-sm text-red-600">{errors.experiencia}</p>}
           </div>
         </div>
-      </div>
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Próximo
-        </button>
-      </div>
+        {/* Botão de continuar */}
+        <div className="flex justify-end pt-6">
+          <button
+            type="submit"
+            className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+          >
+            Continuar
+          </button>
+        </div>
     </form>
   );
 };

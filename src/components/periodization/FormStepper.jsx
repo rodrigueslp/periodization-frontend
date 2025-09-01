@@ -141,11 +141,11 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
 
   // Definir os passos com seus rótulos
   const steps = [
-    { number: 1, label: 'Dados Pessoais' },
-    { number: 2, label: 'Informações de Treino' },
-    { number: 3, label: 'Benchmarks' },
-    { number: 4, label: 'Revisão' },
-    { number: 5, label: 'Pagamento' }
+    { number: 1, title: 'Informações Pessoais', description: 'Dados básicos' },
+    { number: 2, title: 'Informações de Treino', description: 'Experiência e objetivos' },
+    { number: 3, title: 'Benchmarks', description: 'Performance atual' },
+    { number: 4, title: 'Resumo', description: 'Confirme os dados' },
+    { number: 5, title: 'Pagamento', description: 'Finalize seu plano' }
   ];
 
   // Filtrar os passos a serem exibidos
@@ -169,7 +169,7 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
                   {step.number}
                 </div>
                 <div className="text-xs mt-2 text-center">
-                  {step.label}
+                  {step.title}
                 </div>
               </div>
             ))}
@@ -183,7 +183,7 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
           )}
         </div>
         
-        {/* Versão móvel do stepper - completamente redesenhada para melhor responsividade */}
+        {/* Versão móvel do stepper */}
         <div className="sm:hidden">
           <div className="flex items-center justify-around bg-gray-100 rounded-lg p-2">
             {stepsToShow.map((step) => (
@@ -197,18 +197,19 @@ const FormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) =
                 >
                   {step.number}
                 </div>
-                <span className={`text-xs text-center w-16 truncate ${
-                  currentStep >= step.number ? 'text-indigo-600 font-medium' : 'text-gray-500'
-                }`}>
-                  {step.label}
-                </span>
+                <div className="text-xs text-center">
+                  {step.title}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {renderStep()}
+      {/* Step Content */}
+      <div className="bg-white shadow-lg rounded-lg p-6">
+        {renderStep()}
+      </div>
     </div>
   );
 };
