@@ -216,19 +216,7 @@ const RunningPlanSummary = ({ formData, updateFormData, nextStep, prevStep }) =>
             </div>
           </div>
 
-          {/* Resumo do investimento */}
-          <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-md">
-            <div className="flex justify-between items-center">
-              <div>
-                <h5 className="text-sm font-medium text-orange-900">Plano Personalizado de Corrida</h5>
-                <p className="text-sm text-orange-700">{formData.planDuration || 4} semanas de treino</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-orange-900">R$ 29,90</p>
-                <p className="text-xs text-orange-600">Pagamento único</p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         {/* Botões */}
