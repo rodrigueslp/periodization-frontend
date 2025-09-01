@@ -16,6 +16,8 @@ import SettingsPage from './pages/SettingsPage';
 import ViewStrengthPlanPage from './pages/ViewStrengthPlanPage';
 import CreateRunningPlanPage from './pages/CreateRunningPlanPage';
 import ViewRunningPlanPage from './pages/ViewRunningPlanPage';
+import CreateBikePlanPage from './pages/CreateBikePlanPage';
+import ViewBikePlanPage from './pages/ViewBikePlanPage';
 
 // Páginas administrativas
 import AdminPaymentsPage from './pages/admin/AdminPaymentsPage';
@@ -158,6 +160,15 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route 
+            path="/create-bike-plan" 
+            element={
+              <PrivateRoute>
+                <CreateBikePlanPage />
+              </PrivateRoute>
+            }
+          />
           
           <Route 
             path="/view-plan/:planId" 
@@ -182,6 +193,15 @@ function App() {
             element={
               <PrivateRoute>
                 <ViewRunningPlanPage />
+              </PrivateRoute>
+            } 
+          />
+
+          <Route 
+            path="/view-bike-plan/:planId" 
+            element={
+              <PrivateRoute>
+                <ViewBikePlanPage />
               </PrivateRoute>
             } 
           />

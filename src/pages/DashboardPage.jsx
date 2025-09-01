@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import { periodizationService } from '../services/periodization';
 import { strengthTrainingService } from '../services/strengthTraining';
 import { runningTrainingService } from '../services/runningTraining';
+import { bikeTrainingService } from '../services/bikeTraining';
 import { feedbackService } from '../services/feedback';
 import GeneratingProgress from '../components/training/GeneratingProgress';
 import MiniProgress from '../components/ui/MiniProgress';
@@ -35,6 +36,9 @@ const DashboardPage = () => {
       } else if (planType === 'RUNNING') {
         await runningTrainingService.generateApprovedPlan(planId);
         navigate(`/view-running-plan/${planId}`);
+      } else if (planType === 'BIKE') {
+        await bikeTrainingService.generateApprovedPlan(planId);
+        navigate(`/view-bike-plan/${planId}`);
       } else {
         await periodizationService.generateApprovedPlan(planId);
         navigate(`/view-plan/${planId}`);
@@ -67,10 +71,11 @@ const DashboardPage = () => {
     const fetchDashboardData = async () => {
       try {
         // Buscar todos os tipos de planos em paralelo
-        const [crossfitPlans, strengthPlans, runningPlans] = await Promise.all([
+        const [crossfitPlans, strengthPlans, runningPlans, bikePlans] = await Promise.all([
           periodizationService.getAllPlans().catch(() => []),
           strengthTrainingService.getAllPlans().catch(() => []),
-          runningTrainingService.getAllPlans().catch(() => [])
+          runningTrainingService.getAllPlans().catch(() => []),
+          bikeTrainingService.getAllPlans().catch(() => [])
         ]);
 
         // Marcar cada plano com seu tipo para facilitar o processamento
@@ -89,8 +94,13 @@ const DashboardPage = () => {
           planType: 'RUNNING'
         }));
 
+        const markedBikePlans = bikePlans.map(plan => ({
+          ...plan,
+          planType: 'BIKE'
+        }));
+
         // Combinar todos os planos
-        const allPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans];
+        const allPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans, ...markedBikePlans];
         
         // Calcular estatísticas
         const activePlans = allPlans.filter(plan => !plan.isCompleted).length;
@@ -172,6 +182,8 @@ const DashboardPage = () => {
       return `/view-strength-plan/${plan.planId}`;
     } else if (plan.planType === 'RUNNING') {
       return `/view-running-plan/${plan.planId}`;
+    } else if (plan.planType === 'BIKE') {
+      return `/view-bike-plan/${plan.planId}`;
     } else {
       return `/view-plan/${plan.planId}`;
     }
@@ -195,6 +207,16 @@ const DashboardPage = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
           Corrida
+        </span>
+      );
+    } else if (planType === 'BIKE') {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 ml-2">
+          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          Bike
         </span>
       );
     } else {
@@ -329,7 +351,7 @@ const DashboardPage = () => {
           {/* Ações rápidas */}
           <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-6 sm:mb-8">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link
                 to="/create-crossfit-plan"
                 className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700"
@@ -356,6 +378,16 @@ const DashboardPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 Novo Plano Corrida
+              </Link>
+              <Link
+                to="/create-bike-plan"
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+              >
+                <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Novo Plano Bike
               </Link>
             </div>
           </div>

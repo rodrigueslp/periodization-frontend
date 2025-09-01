@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import StrengthPersonalInfoStep from './StrengthPersonalInfoStep';
-import StrengthTrainingInfoStep from './StrengthTrainingInfoStep';
-import StrengthPlanSummary from './StrengthPlanSummary';
+import BikePersonalInfoStep from './BikePersonalInfoStep';
+import BikeTrainingInfoStep from './BikeTrainingInfoStep';
+import BikePlanSummary from './BikePlanSummary';
 import PaymentStep from '../periodization/PaymentStep';
-import { strengthTrainingService } from '../../services/strengthTraining';
+import { bikeTrainingService } from '../../services/bikeTraining';
 
-const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) => {
+const BikeFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormData }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState(initialFormData || {
     nome: '',
@@ -14,18 +14,24 @@ const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormD
     altura: '',
     experiencia: '',
     objetivo: '',
-    objetivoDetalhado: '',
-    disponibilidade: '',
-    lesoes: '',
-    historico: '',
-    trainingFocus: '',
-    periodoTreino: '',
-    equipmentAvailable: '',
-    sessionsPerWeek: '',
-    sessionDuration: '',
+    diasDisponiveis: '',
+    volumeSemanalAtual: '',
+    tipoBike: '',
+    ftpAtual: '',
+    potenciaMediaAtual: '',
+    melhorTempo40km: '',
+    melhorTempo100km: '',
+    melhorTempo160km: '',
+    tempoObjetivo: '',
+    dataProva: '',
+    historicoLesoes: '',
+    experienciaAnterior: '',
+    preferenciaTreino: '',
+    equipamentosDisponiveis: '',
+    zonaTreinoPreferida: '',
     planDuration: 4,
     startDate: '',
-    planType: 'STRENGTH' // Adicione essa propriedade para identificar o tipo de plano
+    planType: 'BIKE'
   });
 
   const updateFormData = (data) => {
@@ -48,83 +54,60 @@ const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormD
             nome: formData.nome,
             idade: parseInt(formData.idade),
             peso: parseFloat(formData.peso),
-            altura: parseFloat(formData.altura.replace(".", "").replace(",", "")),
+            altura: parseInt(formData.altura),
             experiencia: formData.experiencia,
             objetivo: formData.objetivo,
-            objetivoDetalhado: formData.objetivoDetalhado,
-            disponibilidade: parseInt(formData.disponibilidade),
-            lesoes: formData.lesoes,
-            historico: formData.historico,
-            periodoTreino: formData.periodoTreino || null,
-            trainingFocus: formData.trainingFocus,
-            equipmentAvailable: formData.equipmentAvailable,
-            sessionsPerWeek: parseInt(formData.sessionsPerWeek),
-            sessionDuration: parseInt(formData.sessionDuration)
+            diasDisponiveis: parseInt(formData.diasDisponiveis),
+            volumeSemanalAtual: parseInt(formData.volumeSemanalAtual),
+            tipoBike: formData.tipoBike,
+            ftpAtual: formData.ftpAtual ? parseInt(formData.ftpAtual) : null,
+            potenciaMediaAtual: formData.potenciaMediaAtual ? parseInt(formData.potenciaMediaAtual) : null,
+            melhorTempo40km: formData.melhorTempo40km,
+            melhorTempo100km: formData.melhorTempo100km,
+            melhorTempo160km: formData.melhorTempo160km,
+            tempoObjetivo: formData.tempoObjetivo,
+            dataProva: formData.dataProva,
+            historicoLesoes: formData.historicoLesoes,
+            experienciaAnterior: formData.experienciaAnterior,
+            preferenciaTreino: formData.preferenciaTreino,
+            equipamentosDisponiveis: formData.equipamentosDisponiveis,
+            zonaTreinoPreferida: formData.zonaTreinoPreferida
           },
           planDuration: formData.planDuration,
           startDate: formData.startDate
         };
 
-        // Criar plano pendente usando o serviço de musculação
-        const response = await strengthTrainingService.createPendingPlan(requestData);
+        console.log('Criando plano pendente de bike:', requestData);
         
-        // Armazenar o planId no formData para uso no PaymentStep
-        setFormData({ 
-          ...formData, 
-          planId: response.planId,
-          planType: 'STRENGTH' // Garantir que o tipo de plano está definido
-        });
+        // Criar plano pendente de pagamento
+        const response = await bikeTrainingService.createPendingPlan(requestData);
+        console.log('Resposta da criação do plano:', response);
         
-        // Agora avançar para o passo de pagamento
+        if (response.planId) {
+          // Salvar o planId no formData
+          updateFormData({ planId: response.planId });
+        }
+        
         setCurrentStep(currentStep + 1);
       } catch (error) {
-        console.error("Erro ao criar plano pendente:", error);
-        // Mostrar mensagem de erro, se necessário
+        console.error('Erro ao criar plano pendente:', error);
+        alert('Erro ao criar plano: ' + (error.response?.data?.message || error.message));
+        return; // Não avança o step em caso de erro
       }
     } else {
-      // Comportamento normal para outros passos
       setCurrentStep(currentStep + 1);
     }
   };
-  
+
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = () => {
-    // Converte os valores numéricos
-    const processedData = {
-      ...formData,
-      idade: parseInt(formData.idade),
-      peso: parseFloat(formData.peso),
-      altura: parseInt(formData.altura),
-      disponibilidade: parseInt(formData.disponibilidade),
-      sessionsPerWeek: parseInt(formData.sessionsPerWeek),
-      sessionDuration: parseInt(formData.sessionDuration),
-      periodoTreino: formData.periodoTreino || null,
-      planType: 'STRENGTH' // Garantir que o tipo de plano está definido
-    };
-    
-    // Passa os dados para o callback de envio
-    onSubmit(processedData);
+  const handleFormSubmit = (data) => {
+    updateFormData(data);
+    onSubmit({ ...formData, ...data });
   };
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <StrengthPersonalInfoStep formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
-      case 2:
-        return <StrengthTrainingInfoStep formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 3:
-        return <StrengthPlanSummary formData={formData} prevStep={prevStep} nextStep={nextStep} />;
-      case 4:
-        return <PaymentStep formData={formData} prevStep={initialStep === 4 ? null : prevStep} onSubmit={handleSubmit} />;
-      default:
-        return <StrengthPersonalInfoStep formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
-    }
-  };
-
-  // Definir os passos com seus rótulos
   const steps = [
     { number: 1, title: 'Informações Pessoais', description: 'Dados básicos' },
     { number: 2, title: 'Informações de Treino', description: 'Experiência e objetivos' },
@@ -132,21 +115,18 @@ const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormD
     { number: 4, title: 'Pagamento', description: 'Finalize seu plano' }
   ];
 
-  // Filtrar os passos a serem exibidos
-  const stepsToShow = initialStep === 4 ? steps.filter(step => step.number === 4) : steps;
-
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-8">
         {/* Versão para desktop do stepper */}
         <div className="hidden sm:block">
           <div className="flex justify-between items-center">
-            {stepsToShow.map((step) => (
+            {steps.map((step) => (
               <div key={step.number} className="flex flex-col items-center">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center ${
                     currentStep >= step.number
-                      ? 'bg-green-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -168,12 +148,12 @@ const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormD
         {/* Versão móvel do stepper */}
         <div className="sm:hidden">
           <div className="flex items-center justify-around bg-gray-100 rounded-lg p-2">
-            {stepsToShow.map((step) => (
+            {steps.map((step) => (
               <div key={step.number} className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
                     currentStep >= step.number
-                      ? 'bg-green-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-gray-200 text-gray-600'
                   }`}
                 >
@@ -190,10 +170,42 @@ const StrengthFormStepper = ({ onSubmit, initialStep = 1, formData: initialFormD
 
       {/* Step Content */}
       <div className="bg-white shadow-lg rounded-lg p-6">
-        {renderStep()}
+        {currentStep === 1 && (
+          <BikePersonalInfoStep
+            formData={formData}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+          />
+        )}
+        
+        {currentStep === 2 && (
+          <BikeTrainingInfoStep
+            formData={formData}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )}
+        
+        {currentStep === 3 && (
+          <BikePlanSummary
+            formData={formData}
+            updateFormData={updateFormData}
+            nextStep={nextStep}
+            prevStep={prevStep}
+          />
+        )}
+        
+        {currentStep === 4 && (
+          <PaymentStep
+            formData={formData}
+            onSubmit={handleFormSubmit}
+            prevStep={prevStep}
+          />
+        )}
       </div>
     </div>
   );
 };
 
-export default StrengthFormStepper;
+export default BikeFormStepper;

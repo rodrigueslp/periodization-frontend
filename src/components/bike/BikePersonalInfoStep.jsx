@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
+const BikePersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
   const [errors, setErrors] = useState({});
 
   const validateForm = () => {
@@ -62,7 +62,7 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
               id="nome"
               value={formData.nome || ''}
               onChange={(e) => handleInputChange('nome', e.target.value)}
-              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                 errors.nome ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Digite seu nome completo"
@@ -80,7 +80,7 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
               id="idade"
               value={formData.idade || ''}
               onChange={(e) => handleInputChange('idade', e.target.value)}
-              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                 errors.idade ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Ex: 30"
@@ -101,7 +101,7 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
               id="peso"
               value={formData.peso || ''}
               onChange={(e) => handleInputChange('peso', e.target.value)}
-              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                 errors.peso ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Ex: 70.5"
@@ -121,7 +121,7 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
               id="altura"
               value={formData.altura || ''}
               onChange={(e) => handleInputChange('altura', e.target.value)}
-              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                 errors.altura ? 'border-red-300' : 'border-gray-300'
               }`}
               placeholder="Ex: 175"
@@ -134,13 +134,13 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
           {/* Nível de Experiência */}
           <div className="sm:col-span-6">
             <label htmlFor="experiencia" className="block text-sm font-medium text-gray-700">
-              Nível de experiência na musculação *
+              Nível de experiência no ciclismo *
             </label>
             <select
               id="experiencia"
               value={formData.experiencia || ''}
               onChange={(e) => handleInputChange('experiencia', e.target.value)}
-              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+              className={`mt-1 block w-full border rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 ${
                 errors.experiencia ? 'border-red-300' : 'border-gray-300'
               }`}
             >
@@ -158,7 +158,7 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
         <div className="flex justify-end pt-6">
           <button
             type="submit"
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors"
           >
             Continuar
           </button>
@@ -167,4 +167,4 @@ const StrengthPersonalInfoStep = ({ formData, updateFormData, nextStep }) => {
   );
 };
 
-export default StrengthPersonalInfoStep;
+export default BikePersonalInfoStep;

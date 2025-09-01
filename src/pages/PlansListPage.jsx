@@ -4,6 +4,7 @@ import Layout from '../components/layout/Layout';
 import { periodizationService } from '../services/periodization';
 import { strengthTrainingService } from '../services/strengthTraining';
 import { runningTrainingService } from '../services/runningTraining';
+import { bikeTrainingService } from '../services/bikeTraining';
 import GeneratingProgress from '../components/training/GeneratingProgress';
 import MiniProgress from '../components/ui/MiniProgress';
 
@@ -27,6 +28,9 @@ const PlansListPage = () => {
       } else if (planType === 'RUNNING') {
         await runningTrainingService.generateApprovedPlan(planId);
         navigate(`/view-running-plan/${planId}`);
+      } else if (planType === 'BIKE') {
+        await bikeTrainingService.generateApprovedPlan(planId);
+        navigate(`/view-bike-plan/${planId}`);
       } else {
         await periodizationService.generateApprovedPlan(planId);
         navigate(`/view-plan/${planId}`);
@@ -46,10 +50,11 @@ const PlansListPage = () => {
         setError(null);
 
         // Buscar todos os tipos de planos em paralelo
-        const [crossfitPlans, strengthPlans, runningPlans] = await Promise.all([
+        const [crossfitPlans, strengthPlans, runningPlans, bikePlans] = await Promise.all([
           periodizationService.getAllPlans().catch(() => []),
           strengthTrainingService.getAllPlans().catch(() => []),
-          runningTrainingService.getAllPlans().catch(() => [])
+          runningTrainingService.getAllPlans().catch(() => []),
+          bikeTrainingService.getAllPlans().catch(() => [])
         ]);
 
         // Marcar cada plano com seu tipo para facilitar o processamento
@@ -68,8 +73,13 @@ const PlansListPage = () => {
           planType: 'RUNNING'
         }));
 
+        const markedBikePlans = bikePlans.map(plan => ({
+          ...plan,
+          planType: 'BIKE'
+        }));
+
         // Combinar todos os planos e ordenar por data de criação (mais recentes primeiro)
-        const combinedPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans]
+        const combinedPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans, ...markedBikePlans]
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         setAllPlans(combinedPlans);
@@ -93,10 +103,11 @@ const PlansListPage = () => {
         // reexecuta a mesma lógica do fetchPlans
         (async () => {
           try {
-            const [crossfitPlans, strengthPlans, runningPlans] = await Promise.all([
+            const [crossfitPlans, strengthPlans, runningPlans, bikePlans] = await Promise.all([
               periodizationService.getAllPlans().catch(() => []),
               strengthTrainingService.getAllPlans().catch(() => []),
-              runningTrainingService.getAllPlans().catch(() => [])
+              runningTrainingService.getAllPlans().catch(() => []),
+              bikeTrainingService.getAllPlans().catch(() => [])
             ]);
 
             const markedCrossfitPlans = crossfitPlans.map(plan => ({
@@ -114,7 +125,12 @@ const PlansListPage = () => {
               planType: 'RUNNING'
             }));
 
-            const combinedPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans]
+            const markedBikePlans = bikePlans.map(plan => ({
+              ...plan,
+              planType: 'BIKE'
+            }));
+
+            const combinedPlans = [...markedCrossfitPlans, ...markedStrengthPlans, ...markedRunningPlans, ...markedBikePlans]
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             setAllPlans(combinedPlans);
@@ -182,7 +198,16 @@ const PlansListPage = () => {
     '10k': 'bg-cyan-100 text-cyan-800',
     '21k': 'bg-amber-100 text-amber-800',
     '42k': 'bg-red-100 text-red-800',
-    'condicionamento geral': 'bg-slate-100 text-slate-800'
+    'condicionamento geral': 'bg-slate-100 text-slate-800',
+    
+    // Objetivos de Bike
+    'condicionamento': 'bg-slate-100 text-slate-800',
+    'speed': 'bg-blue-100 text-blue-800',
+    'mountain_bike': 'bg-green-100 text-green-800',
+    'triathlon': 'bg-purple-100 text-purple-800',
+    'competicao': 'bg-red-100 text-red-800',
+    'perda_peso': 'bg-yellow-100 text-yellow-800',
+    'resistencia': 'bg-indigo-100 text-indigo-800'
   };
 
   // Mapeando valores para exibição mais amigável
@@ -205,7 +230,16 @@ const PlansListPage = () => {
     '10k': '10K',
     '21k': '21K (Meia Maratona)',
     '42k': '42K (Maratona)',
-    'condicionamento geral': 'Condicionamento Geral'
+    'condicionamento geral': 'Condicionamento Geral',
+    
+    // Objetivos de Bike
+    'condicionamento': 'Condicionamento Geral',
+    'speed': 'Ciclismo de Estrada/Speed',
+    'mountain_bike': 'Mountain Bike',
+    'triathlon': 'Triathlon',
+    'competicao': 'Competição/Performance',
+    'perda_peso': 'Perda de Peso',
+    'resistencia': 'Resistência de Longa Distância'
   };
 
   // Status colors
@@ -233,6 +267,8 @@ const PlansListPage = () => {
       return `/view-strength-plan/${plan.planId}`;
     } else if (plan.planType === 'RUNNING') {
       return `/view-running-plan/${plan.planId}`;
+    } else if (plan.planType === 'BIKE') {
+      return `/view-bike-plan/${plan.planId}`;
     } else {
       return `/view-plan/${plan.planId}`;
     }
@@ -256,6 +292,16 @@ const PlansListPage = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
           Corrida
+        </span>
+      );
+    } else if (planType === 'BIKE') {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+          <svg className="w-3 h-3 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Bike
         </span>
       );
     } else {
@@ -337,6 +383,7 @@ const PlansListPage = () => {
               <option value="CROSSFIT">CrossFit</option>
               <option value="STRENGTH">Musculação</option>
               <option value="RUNNING">Corrida</option>
+              <option value="BIKE">Bike</option>
             </select>
           </div>
           <div>
